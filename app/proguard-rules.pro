@@ -1,0 +1,1 @@
+# Default AGP ProGuard rules. Room, Compose and Navigation ship their own consumer rules.

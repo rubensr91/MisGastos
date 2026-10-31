@@ -1,0 +1,278 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">My Expenses</string>
+    <string name="notification_listener_label">My Expenses (notification access)</string>
+    <string name="test_notification_channel_name">Notification tests</string>
+    <string name="test_notification_channel_description">Sample notifications to check that the app reads your expenses.</string>
+    <string name="test_notification_title">You spent €1.23 at Demo Store</string>
+    <string name="test_notification_text">Test notification. On your phone it will appear with your expenses.</string>
+
+    <!-- Common -->
+    <string name="common_cancel">Cancel</string>
+    <string name="common_confirm">Confirm</string>
+    <string name="common_delete">Delete</string>
+    <string name="common_undo">Undo</string>
+    <string name="common_continue">Continue</string>
+    <string name="common_start">Get started</string>
+    <string name="common_back">Back</string>
+    <string name="common_save">Save</string>
+    <string name="common_close">Close</string>
+    <string name="common_optional">optional</string>
+
+    <!-- Navigation -->
+    <string name="nav_summary">Summary</string>
+    <string name="nav_expenses">Expenses</string>
+    <string name="nav_settings">Settings</string>
+
+    <!-- Onboarding -->
+    <string name="onboarding_welcome_title">Your expenses, on autopilot</string>
+    <string name="onboarding_welcome_body">Every time you pay with your card, your bank sends a notification. My Expenses reads it, stores the amount and that is it: nothing to open, nothing to tap.</string>
+    <string name="onboarding_welcome_point_1">Reads your bank notifications</string>
+    <string name="onboarding_welcome_point_2">Amount, merchant and date stored on your own phone</string>
+    <string name="onboarding_welcome_point_3">Charts and stats by day, month, merchant or category</string>
+    <string name="onboarding_welcome_point_4">No account, no cloud, no internet access</string>
+
+    <string name="onboarding_access_title">Notification access is required</string>
+    <string name="onboarding_access_body">This is the permission Android demands before an app can read what other apps post. Enable it in system settings and come back; this screen refreshes on its own.</string>
+    <string name="onboarding_access_granted">Access granted. We can now read your notifications.</string>
+    <string name="onboarding_open_settings">Open notification settings</string>
+    <string name="onboarding_send_test">Send a test notification</string>
+    <string name="onboarding_test_sent">Test notification sent. If it shows up on top with 1.23 €, everything works.</string>
+    <string name="onboarding_notification_permission">To send you the test notification, My Expenses needs permission to post notifications.</string>
+    <string name="onboarding_test_button_disabled">Notification permission is needed to send the test.</string>
+
+    <string name="onboarding_step_format">Step %1$d of %2$d</string>
+    <string name="onboarding_next">Next</string>
+    <string name="onboarding_skip">Skip</string>
+
+    <!-- Settings -->
+    <string name="settings_title">Settings</string>
+    <string name="settings_section_access">Notification access</string>
+    <string name="settings_access_granted">Granted</string>
+    <string name="settings_access_missing">Not granted</string>
+    <string name="settings_open_access">Open system settings</string>
+
+    <string name="settings_section_sources">Source apps</string>
+    <string name="settings_sources_all">All apps</string>
+    <string name="settings_sources_all_desc">Notifications from every app on the phone will be read.</string>
+    <string name="settings_sources_selected_desc">Only the apps ticked below will be read.</string>
+    <string name="settings_sources_empty">No expense-notification app has been detected yet.</string>
+
+    <string name="settings_section_diagnostics">Diagnostics</string>
+    <string name="settings_diag_service_ok">Listener service connected</string>
+    <string name="settings_diag_service_missing">Listener service not permitted</string>
+    <string name="settings_diag_battery_ok">Battery optimisation is not restricting it</string>
+    <string name="settings_diag_battery_restricted">Battery optimisation may stop the service</string>
+    <string name="settings_diag_battery_open">Review battery optimisation</string>
+    <string name="settings_diag_app_unknown">Unknown app (%1$s)</string>
+    <string name="settings_diag_suggested">Suggested</string>
+    <string name="settings_diag_advice_battery">If the service stops on its own, exclude Mis Gastos from battery optimisation and from apps that kill background processes.</string>
+    <string name="settings_diag_advice_no_data">If no expense comes in, check that your bank actually sends the notification and that its app is listed under "Sending apps".</string>
+
+    <string name="settings_section_data">Your data</string>
+    <plurals name="settings_stored_count">
+        <item quantity="one">%1$d expense stored</item>
+        <item quantity="other">%1$d expenses stored</item>
+    </plurals>
+    <string name="settings_delete_all">Delete all expenses</string>
+    <string name="settings_delete_all_confirm_title">Delete everything?</string>
+    <string name="settings_delete_all_confirm_body">The %1$d expenses stored on this phone will be removed. Nothing is backed up anywhere: this cannot be undone.</string>
+    <string name="settings_delete_all_confirm_action">Yes, delete all</string>
+    <string name="settings_deleted_all">All expenses have been deleted.</string>
+
+    <string name="settings_section_review">Manual review</string>
+    <string name="settings_review_empty">Nothing to review: every notification was parsed with confidence.</string>
+    <string name="settings_review_confidence">Confidence %1$d%%</string>
+    <string name="settings_review_hint">Fix the merchant if your bank wrote something else</string>
+
+    <string name="settings_section_about">About</string>
+    <string name="settings_version">Version %1$s</string>
+    <string name="settings_privacy">Your data stays on this phone. The app has no internet permission.</string>
+
+    <!-- Summary -->
+    <string name="summary_title">Summary</string>
+    <string name="summary_today">Today</string>
+    <string name="summary_month">This month</string>
+    <string name="summary_previous_month">Last month</string>
+    <string name="summary_vs_previous">%1$s vs last month</string>
+    <string name="summary_up">%1$s more than last month</string>
+    <string name="summary_down">%1$s less than last month</string>
+    <string name="summary_evolution">Last 30 days</string>
+    <string name="summary_average">Daily average (7 days)</string>
+    <string name="summary_top_merchants">Top merchants</string>
+    <string name="summary_by_category">By category</string>
+    <string name="summary_empty_title">No expenses yet</string>
+    <string name="summary_empty_body">As soon as you pay with your card and your bank posts the notification, it will show up here. You can check everything works with a test notification from Settings.</string>
+
+    <!-- Expense list -->
+    <string name="expenses_title">Expenses</string>
+    <string name="expenses_search_hint">Search merchant, category or text</string>
+    <string name="expenses_empty_title">No results</string>
+    <string name="expenses_empty_body">No expenses match these filters.</string>
+    <string name="expenses_deleted">Expense deleted.</string>
+    <plurals name="expenses_result_count">
+        <item quantity="one">%1$d expense · %2$s</item>
+        <item quantity="other">%1$d expenses · %2$s</item>
+    </plurals>
+
+    <string name="expense_needs_review">Needs review</string>
+    <string name="expense_category_label">Category</string>
+    <string name="expense_category_new">New category</string>
+    <string name="expense_category_edit">Edit expense</string>
+    <string name="expense_category_hint">Category name</string>
+    <string name="expense_merchant_hint">Merchant</string>
+    <string name="expense_raw_text">Original text</string>
+    <string name="expense_source">Source</string>
+    <string name="expense_delete_confirm_title">Delete this expense?</string>
+    <string name="expense_delete_confirm_body">It will be removed from the list. You can undo it with the snackbar shown below.</string>
+
+    <!-- Export -->
+    <string name="export_csv">Export CSV</string>
+    <string name="export_csv_done">File saved.</string>
+    <string name="export_csv_failed">The file could not be saved.</string>
+    <string name="export_csv_empty">There is nothing to export.</string>
+    <!-- Category names: the id is the value stored in the database -->
+    <string name="category_uncategorized">Uncategorized</string>
+    <string name="category_groceries">Groceries</string>
+    <string name="category_restaurant">Restaurants</string>
+    <string name="category_fast_food">Fast food</string>
+    <string name="category_transport">Transport</string>
+    <string name="category_fuel">Fuel</string>
+    <string name="category_parking">Parking</string>
+    <string name="category_travel">Travel</string>
+    <string name="category_online_shopping">Online shopping</string>
+    <string name="category_subscriptions">Subscriptions</string>
+    <string name="category_health">Health</string>
+    <string name="category_leisure">Leisure</string>
+    <string name="category_services">Utilities &amp; services</string>
+    <string name="category_education">Education</string>
+    <string name="category_sports">Sports</string>
+    <string name="category_pets">Pets</string>
+    <string name="category_gifts">Gifts</string>
+    <string name="category_banking">Banking</string>
+    <string name="category_taxes">Taxes</string>
+    <string name="category_cash">Cash</string>
+    <string name="category_other">Other</string>
+
+    <!-- Automatic categorisation -->
+    <string name="settings_section_auto">Automatic categorisation</string>
+    <string name="settings_auto_desc">New expenses are categorised automatically from the merchant. When you fix a category, the app remembers it for that merchant and applies it to the following ones.</string>
+    <string name="settings_section_learned">Learned from you</string>
+    <plurals name="settings_learned_count">
+        <item quantity="one">%1$d merchant</item>
+        <item quantity="other">%1$d merchants</item>
+    </plurals>
+    <string name="settings_learned_empty">You have not fixed a category yet. Whatever it learns will show up here.</string>
+    <string name="settings_learned_forget">Forget</string>
+    <string name="settings_learned_forget_desc">It will be categorised with the general rules again.</string>
+    <!-- Appearance -->
+    <string name="settings_section_appearance">Appearance</string>
+    <string name="settings_theme_system">System</string>
+    <string name="settings_theme_light">Light</string>
+    <string name="settings_theme_dark">Dark</string>
+    <string name="settings_theme_desc">Your choice is remembered the next time you open the app.</string>
+
+    <!-- Summary redesign -->
+    <string name="summary_spent_month">Spent this month</string>
+    <string name="summary_spent_today">Spent today</string>
+    <string name="summary_average_daily">Daily average</string>
+    <string name="summary_average_daily_hint">Last 7 days</string>
+    <string name="summary_ticket_average">Average ticket</string>
+    <string name="summary_ticket_average_hint">Per expense this month</string>
+    <string name="summary_movements">Transactions</string>
+    <string name="summary_donut_center">Month total</string>
+    <string name="summary_top_merchants_hint">Top 5 merchants by spend</string>
+    <string name="summary_by_category_hint">How this month\'s spend splits</string>
+    <string name="summary_trend_first_month">First month tracked</string>
+
+    <!-- List redesign -->
+    <string name="expenses_group_today">Today</string>
+    <string name="expenses_group_yesterday">Yesterday</string>
+    <string name="expenses_group_total">Day total</string>
+
+    <!-- Onboarding -->
+    <string name="onboarding_welcome_eyebrow">Your expenses, on autopilot</string>
+
+    <!-- Chart accessibility descriptions -->
+    <string name="chart_cd_evolution">Spend evolution</string>
+    <string name="chart_cd_categories">Spend by category</string>
+    <string name="chart_cd_merchants">Top merchants</string>
+    <string name="expenses_hint_swipe">Swipe a row left to edit or delete it</string>
+    <string name="expenses_action_edit">Edit</string>
+    <string name="expense_amount_label">Amount</string>
+    <string name="expense_amount_invalid">Enter a valid amount, for example 12.50</string>
+    <string name="expense_edited">Expense updated</string>
+    <string name="expense_edit_failed">Could not save the change</string>
+    <string name="settings_diag_rebind_unsupported">This Android version cannot reconnect the service automatically: turn notification access off and on again.</string>
+    <string name="summary_month_close">Month close</string>
+    <string name="summary_month_close_hint">%1$d months</string>
+    <string name="summary_month_close_option">%1$d months</string>
+    <string name="summary_month_close_year">Total for %1$d</string>
+    <string name="summary_month_variation_up">+%1$d%%</string>
+    <string name="summary_month_variation_down">-%1$d%%</string>
+    <string name="summary_month_variation_flat">Same as last month</string>
+    <string name="summary_budgets">Budgets</string>
+    <string name="summary_budgets_hint">Monthly limit per category</string>
+    <string name="summary_budget_remaining">%1$s left</string>
+    <string name="summary_budget_over">Over by %1$s</string>
+    <string name="summary_budget_spent_of">%1$s of %2$s</string>
+    <string name="summary_budget_no_spend">No spending this month</string>
+    <string name="settings_section_budgets">Budgets</string>
+    <string name="settings_budgets_desc">Set a monthly limit per category. The summary compares that limit with what you spent this month. No alerts are sent.</string>
+    <string name="settings_budgets_empty">No budgets yet. Add one to see it in the summary.</string>
+    <string name="settings_budget_add">Add budget</string>
+    <string name="settings_budget_remove">Remove</string>
+    <string name="settings_budget_remove_title">Remove the %1$s budget?</string>
+    <string name="settings_budget_remove_body">The limit will be deleted and the category will only show in the summary.</string>
+    <string name="settings_budget_dialog_title">New budget</string>
+    <string name="settings_budget_limit_label">Monthly limit</string>
+    <string name="settings_budget_amount_invalid">Enter a valid amount, for example 150</string>
+    <string name="settings_budget_saved">Budget saved</string>
+    <string name="settings_budget_removed">Budget removed</string>
+    <string name="summary_budget_limit_line">Limit: %1$s</string>
+    <string name="expenses_action_add">Add expense</string>
+    <string name="expense_create_title">New expense</string>
+    <string name="expense_create_done">Expense added</string>
+    <string name="expense_create_failed">Could not add the expense</string>
+    <string name="expense_date_label">Date</string>
+    <string name="expense_date_change">Change the date</string>
+    <string name="expense_category_auto_hint">If you do not pick a category, it will be guessed from the merchant.</string>
+    <string name="settings_sources_title">Apps we read notifications from</string>
+    <string name="settings_sources_privacy">Only the apps you mark here. Anything that arrives
+        from any other app is discarded unread, so neither the text nor the amount is stored.
+        The app has no internet permission: nothing leaves this phone.</string>
+    <string name="settings_sources_all_risk">Right now notifications from ALL apps on the
+        phone are being read, not just your bank\'s.</string>
+    <string name="settings_sources_narrow">Keep only the apps I mark</string>
+    <string name="settings_sources_choice_label">Apps to read notifications from</string>
+    <string name="settings_sources_only_selected_risk">Only the apps you mark below will be
+        read. If your bank is not there, no expense will be saved.</string>
+    <plurals name="settings_sources_count">
+        <item quantity="one">%1$d stored expense</item>
+        <item quantity="other">%1$d stored expenses</item>
+    </plurals>
+    <string name="settings_sources_forget">Forget</string>
+    <string name="settings_sources_forget_title">Forget this app?</string>
+    <string name="settings_sources_forget_body">The %1$d stored expenses from %2$s will be
+        deleted and the app will no longer be allowed. This cannot be undone.</string>
+    <string name="settings_sources_forget_done">Forgot everything from %1$s</string>
+    <string name="settings_sources_empty_hint">No app has sent anything yet. As soon as an app
+        tells you about a payment and it is not saved, come back here to mark it.</string>
+    <string name="settings_sources_selected">Only the apps I mark</string>
+    <string name="settings_sources_app_unknown">No public name</string>
+    <string name="expenses_grouping_day">Day</string>
+    <string name="expenses_grouping_week">Week</string>
+    <string name="expenses_grouping_month">Month</string>
+    <string name="expenses_group_this_week">This week</string>
+    <string name="expenses_group_last_week">Last week</string>
+    <string name="expenses_group_this_month">This month</string>
+    <string name="expenses_group_last_month">Last month</string>
+    <string name="expenses_group_week_range">%1$s – %2$s</string>
+    <string name="summary_month_average_ticket">%1$s per expense</string>
+    <plurals name="summary_month_movements">
+        <item quantity="one">%1$d transaction</item>
+        <item quantity="other">%1$d transactions</item>
+    </plurals>
+    <string name="settings_privacy_policy">Privacy policy</string>
+</resources>
+

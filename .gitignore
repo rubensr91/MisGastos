@@ -1,0 +1,24 @@
+*.iml
+.gradle/
+/local.properties
+/.idea/
+.DS_Store
+/build
+/captures
+.externalNativeBuild
+.cxx
+local.properties
+
+# Firma de publicacion en Google Play: NUNCA subir estos ficheros a git.
+# keystore.properties contiene las contrasenas y keystore/ el almacen de claves.
+/keystore.properties
+keystore.properties
+/keystore/
+keystore/
+
+# La plantilla si que se versiona, para que quede documentado como crearla.
+!keystore.properties.example
+# Salidas de compilacion de cualquier modulo
+build/
+**/build/
+.kotlin/

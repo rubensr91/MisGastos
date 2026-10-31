@@ -1,0 +1,282 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Mis Gastos</string>
+    <string name="notification_listener_label">Mis Gastos (lectura de notificaciones)</string>
+    <string name="test_notification_channel_name">Pruebas de notificación</string>
+    <string name="test_notification_channel_description">Notificaciones de ejemplo para comprobar que la app lee los gastos.</string>
+    <string name="test_notification_title">Gastaste 1,23 € en Tienda Demo</string>
+    <string name="test_notification_text">Notificación de prueba. En tu móvil aparecerá junto a tus gastos.</string>
+
+    <!-- Común -->
+    <string name="common_cancel">Cancelar</string>
+    <string name="common_confirm">Confirmar</string>
+    <string name="common_delete">Eliminar</string>
+    <string name="common_undo">Deshacer</string>
+    <string name="common_continue">Continuar</string>
+    <string name="common_start">Empezar</string>
+    <string name="common_back">Atrás</string>
+    <string name="common_save">Guardar</string>
+    <string name="common_close">Cerrar</string>
+    <string name="common_optional">opcional</string>
+
+    <!-- Navegación -->
+    <string name="nav_summary">Resumen</string>
+    <string name="nav_expenses">Gastos</string>
+    <string name="nav_settings">Ajustes</string>
+
+    <!-- Onboarding -->
+    <string name="onboarding_welcome_title">Tus gastos, automáticos</string>
+    <string name="onboarding_welcome_body">Cada vez que pagues con tu tarjeta, tu banco te envía una notificación. Mis Gastos la lee, guarda el importe y ya está: sin abrir nada, sin tocar una sola vez.</string>
+    <string name="onboarding_welcome_point_1">Lectura de las notificaciones de tu banco</string>
+    <string name="onboarding_welcome_point_2">Importe, comercio y fecha guardados en tu propio teléfono</string>
+    <string name="onboarding_welcome_point_3">Gráficos y estadísticas por día, mes, comercio o categoría</string>
+    <string name="onboarding_welcome_point_4">Sin cuenta, sin nube y sin conexión a internet</string>
+
+    <string name="onboarding_access_title">Necesita acceso a las notificaciones</string>
+    <string name="onboarding_access_body">Es el permiso que Android exige para poder leer lo que escriben otras apps. Actívalo en Ajustes del sistema y vuelve; esta pantalla se actualiza sola.</string>
+    <string name="onboarding_access_granted">Acceso concedido. Ya podemos leer tus notificaciones.</string>
+    <string name="onboarding_open_settings">Abrir ajustes de notificaciones</string>
+    <string name="onboarding_send_test">Enviar notificación de prueba</string>
+    <string name="onboarding_test_sent">Notificación de prueba enviada. Si aparece arriba con 1,23 €, todo funciona.</string>
+    <string name="onboarding_notification_permission">Para enviarte la notificación de prueba, Mis Gastos necesita permiso de enviarte avisos.</string>
+    <string name="onboarding_test_button_disabled">Necesitas el permiso de avisos para enviar la prueba.</string>
+
+    <string name="onboarding_step_format">Paso %1$d de %2$d</string>
+    <string name="onboarding_next">Siguiente</string>
+    <string name="onboarding_skip">Saltar</string>
+
+    <!-- Ajustes -->
+    <string name="settings_title">Ajustes</string>
+    <string name="settings_section_access">Acceso a notificaciones</string>
+    <string name="settings_access_granted">Concedido</string>
+    <string name="settings_access_missing">No concedido</string>
+    <string name="settings_open_access">Abrir ajustes del sistema</string>
+
+    <string name="settings_section_sources">Apps emisoras</string>
+    <string name="settings_sources_all">Todas las apps</string>
+    <string name="settings_sources_all_desc">Se leerán los avisos de cualquier app del teléfono.</string>
+    <string name="settings_sources_selected_desc">Solo se leerán las apps marcadas abajo.</string>
+    <string name="settings_sources_empty">Aún no se ha detectado ninguna app que envíe notificaciones de gasto.</string>
+
+    <string name="settings_section_diagnostics">Diagnóstico</string>
+    <string name="settings_diag_service_ok">Servicio de escucha conectado</string>
+    <string name="settings_diag_service_missing">Servicio de escucha sin permiso</string>
+    <string name="settings_diag_battery_ok">Optimización de batería no lo restringe</string>
+    <string name="settings_diag_battery_restricted">La optimización de batería puede detener el servicio</string>
+    <string name="settings_diag_battery_open">Revisar optimización de batería</string>
+    <string name="settings_diag_app_unknown">App desconocida (%1$s)</string>
+    <string name="settings_diag_suggested">Sugeridas</string>
+    <string name="settings_diag_advice_battery">Si el servicio se detiene solo, excluye Mis Gastos de la optimización de batería y de las apps que matan procesos en segundo plano.</string>
+    <string name="settings_diag_advice_no_data">Si no entra ningún gasto, comprueba que el banco envíe la notificación y que su app esté marcada en "Apps emisoras".</string>
+
+    <string name="settings_section_data">Tus datos</string>
+    <plurals name="settings_stored_count">
+        <item quantity="one">%1$d gasto guardado</item>
+        <item quantity="other">%1$d gastos guardados</item>
+    </plurals>
+    <string name="settings_delete_all">Borrar todos los gastos</string>
+    <string name="settings_delete_all_confirm_title">¿Borrar todo?</string>
+    <string name="settings_delete_all_confirm_body">Se eliminarán los %1$d gastos guardados en este teléfono. No hay copia en ningún sitio: no se puede deshacer.</string>
+    <string name="settings_delete_all_confirm_action">Sí, borrar todo</string>
+    <string name="settings_deleted_all">Todos los gastos han sido borrados.</string>
+
+    <string name="settings_section_review">Revisión manual</string>
+    <string name="settings_review_empty">Nada que revisar: todas las notificaciones se interpretaron con confianza.</string>
+    <string name="settings_review_confidence">Confianza %1$d%%</string>
+    <string name="settings_review_hint">Corrige el comercio si el banco escribió otra cosa</string>
+
+    <string name="settings_section_about">Acerca de</string>
+    <string name="settings_version">Versión %1$s</string>
+    <string name="settings_privacy">Los datos se guardan solo en este teléfono. La app no tiene permiso de internet.</string>
+
+    <!-- Resumen -->
+    <string name="summary_title">Resumen</string>
+    <string name="summary_today">Hoy</string>
+    <string name="summary_month">Este mes</string>
+    <string name="summary_previous_month">Mes anterior</string>
+    <string name="summary_vs_previous">%1$s frente al mes anterior</string>
+    <string name="summary_up">%1$s más que el mes anterior</string>
+    <string name="summary_down">%1$s menos que el mes anterior</string>
+    <string name="summary_evolution">Últimos 30 días</string>
+    <string name="summary_average">Media diaria (7 días)</string>
+    <string name="summary_top_merchants">Top comercios</string>
+    <string name="summary_by_category">Por categoría</string>
+    <string name="summary_empty_title">Todavía no hay gastos</string>
+    <string name="summary_empty_body">En cuanto pagues con la tarjeta y tu banco envíe la notificación, aparecerá aquí. Puedes comprobar que funciona con una notificación de prueba desde Ajustes.</string>
+
+    <!-- Lista de gastos -->
+    <string name="expenses_title">Gastos</string>
+    <string name="expenses_search_hint">Buscar comercio, categoría o texto</string>
+    <string name="expenses_empty_title">Sin resultados</string>
+    <string name="expenses_empty_body">No hay gastos que cumplan estos filtros.</string>
+    <string name="expenses_deleted">Gasto eliminado.</string>
+    <plurals name="expenses_result_count">
+        <item quantity="one">%1$d gasto · %2$s</item>
+        <item quantity="other">%1$d gastos · %2$s</item>
+    </plurals>
+
+    <string name="expense_needs_review">Conviene revisar</string>
+    <string name="expense_category_label">Categoría</string>
+    <string name="expense_category_new">Nueva categoría</string>
+    <string name="expense_category_edit">Editar gasto</string>
+    <string name="expense_category_hint">Nombre de la categoría</string>
+    <string name="expense_merchant_hint">Comercio</string>
+    <string name="expense_raw_text">Texto original</string>
+    <string name="expense_source">Origen</string>
+    <string name="expense_delete_confirm_title">¿Eliminar este gasto?</string>
+    <string name="expense_delete_confirm_body">Se borrará de la lista. Puedes deshacerlo con el aviso que aparecerá abajo.</string>
+
+    <!-- Exportar -->
+    <string name="export_csv">Exportar CSV</string>
+    <string name="export_csv_done">Archivo guardado.</string>
+    <string name="export_csv_failed">No se pudo guardar el archivo.</string>
+    <string name="export_csv_empty">No hay gastos que exportar.</string>
+    <!-- Categorias: el identificador es el valor guardado en la base de datos -->
+    <string name="category_uncategorized">Sin categoría</string>
+    <string name="category_groceries">Supermercado</string>
+    <string name="category_restaurant">Restaurante</string>
+    <string name="category_fast_food">Comida rápida</string>
+    <string name="category_transport">Transporte</string>
+    <string name="category_fuel">Combustible</string>
+    <string name="category_parking">Estacionamiento</string>
+    <string name="category_travel">Viajes</string>
+    <string name="category_online_shopping">Compras online</string>
+    <string name="category_subscriptions">Suscripciones</string>
+    <string name="category_health">Salud</string>
+    <string name="category_leisure">Ocio</string>
+    <string name="category_services">Servicios</string>
+    <string name="category_education">Educación</string>
+    <string name="category_sports">Deportes</string>
+    <string name="category_pets">Mascotas</string>
+    <string name="category_gifts">Regalos</string>
+    <string name="category_banking">Banca</string>
+    <string name="category_taxes">Impuestos</string>
+    <string name="category_cash">Efectivo</string>
+    <string name="category_other">Otros</string>
+
+    <!-- Categorizacion automatica -->
+    <string name="settings_section_auto">Categorización automática</string>
+    <string name="settings_auto_desc">Los gastos nuevos se clasifican solos a partir del comercio. Cuando corriges una categoría, la app la recuerda para ese comercio y la aplica a los siguientes.</string>
+    <string name="settings_section_learned">Aprendido de ti</string>
+    <plurals name="settings_learned_count">
+        <item quantity="one">%1$d comercio</item>
+        <item quantity="other">%1$d comercios</item>
+    </plurals>
+    <string name="settings_learned_empty">Todavía no has corregido ninguna categoría. Lo que aprendas aparecerá aquí.</string>
+    <string name="settings_learned_forget">Olvidar</string>
+    <string name="settings_learned_forget_desc">Se volverá a clasificar con las reglas generales.</string>
+    <!-- Apariencia -->
+    <string name="settings_section_appearance">Apariencia</string>
+    <string name="settings_theme_system">Sistema</string>
+    <string name="settings_theme_light">Claro</string>
+    <string name="settings_theme_dark">Oscuro</string>
+    <string name="settings_theme_desc">Tu elección se recuerda la próxima vez que abras la app.</string>
+
+    <!-- Rediseño del resumen -->
+    <string name="summary_spent_month">Gastado este mes</string>
+    <string name="summary_spent_today">Gastado hoy</string>
+    <string name="summary_average_daily">Media diaria</string>
+    <string name="summary_average_daily_hint">Últimos 7 días</string>
+    <string name="summary_ticket_average">Ticket medio</string>
+    <string name="summary_ticket_average_hint">Por gasto de este mes</string>
+    <string name="summary_movements">Movimientos</string>
+    <string name="summary_donut_center">Total del mes</string>
+    <string name="summary_top_merchants_hint">Los 5 comercios con más gasto</string>
+    <string name="summary_by_category_hint">Reparto del gasto del mes</string>
+    <string name="summary_trend_first_month">Primer mes registrado</string>
+
+    <!-- Rediseño de la lista -->
+    <string name="expenses_group_today">Hoy</string>
+    <string name="expenses_group_yesterday">Ayer</string>
+    <string name="expenses_group_total">Total del día</string>
+
+    <!-- Onboarding -->
+    <string name="onboarding_welcome_eyebrow">Tus gastos, automáticos</string>
+
+    <!-- Descripciones accesibles de los gráficos -->
+    <string name="chart_cd_evolution">Evolución del gasto</string>
+    <string name="chart_cd_categories">Reparto por categoría</string>
+    <string name="chart_cd_merchants">Comercios con más gasto</string>
+    <string name="expenses_hint_swipe">Desliza una fila hacia la izquierda para editarla o borrarla</string>
+    <string name="expenses_action_edit">Editar</string>
+    <string name="expense_amount_label">Importe</string>
+    <string name="expense_amount_invalid">Escribe un importe válido, por ejemplo 12,50</string>
+    <string name="expense_edited">Gasto actualizado</string>
+    <string name="expense_edit_failed">No se pudo guardar el cambio</string>
+    <string name="settings_diag_rebind_unsupported">Esta versión de Android no permite reconectar el servicio automáticamente: vuelve a activar el acceso a notificaciones.</string>
+    <string name="summary_month_close">Cierre de mes</string>
+    <string name="summary_month_close_hint">%1$d meses</string>
+    <string name="summary_month_close_option">%1$d meses</string>
+    <string name="summary_month_close_year">Total de %1$d</string>
+    <string name="summary_month_variation_up">+%1$d %%</string>
+    <string name="summary_month_variation_down">-%1$d %%</string>
+    <string name="summary_month_variation_flat">Igual que el mes anterior</string>
+    <string name="summary_budgets">Presupuestos</string>
+    <string name="summary_budgets_hint">Límite mensual por categoría</string>
+    <string name="summary_budget_remaining">Quedan %1$s</string>
+    <string name="summary_budget_over">Te has pasado por %1$s</string>
+    <string name="summary_budget_spent_of">%1$s de %2$s</string>
+    <string name="summary_budget_no_spend">Sin gasto este mes</string>
+    <string name="settings_section_budgets">Presupuestos</string>
+    <string name="settings_budgets_desc">Fija un límite mensual por categoría. El Resumen compara ese límite con lo gastado este mes. No se envía ningún aviso.</string>
+    <string name="settings_budgets_empty">Todavía no hay presupuestos. Añade uno para verlo en el Resumen.</string>
+    <string name="settings_budget_add">Añadir presupuesto</string>
+    <string name="settings_budget_remove">Quitar</string>
+    <string name="settings_budget_remove_title">¿Quitar el presupuesto de %1$s?</string>
+    <string name="settings_budget_remove_body">El límite se borrará y la categoría volverá a aparecer solo en el Resumen.</string>
+    <string name="settings_budget_dialog_title">Nuevo presupuesto</string>
+    <string name="settings_budget_limit_label">Límite mensual</string>
+    <string name="settings_budget_amount_invalid">Escribe un importe válido, por ejemplo 150</string>
+    <string name="settings_budget_saved">Presupuesto guardado</string>
+    <string name="settings_budget_removed">Presupuesto eliminado</string>
+    <string name="summary_budget_limit_line">Límite: %1$s</string>
+    <string name="expenses_action_add">Añadir gasto</string>
+    <string name="expense_create_title">Nuevo gasto</string>
+    <string name="expense_create_done">Gasto añadido</string>
+    <string name="expense_create_failed">No se pudo añadir el gasto</string>
+    <string name="expense_date_label">Fecha</string>
+    <string name="expense_date_change">Cambiar la fecha</string>
+    <string name="expense_category_auto_hint">Si no eliges categoría, se deducirá del comercio.</string>
+    <string name="settings_sources_title">Apps de las que se leen avisos</string>
+    <string name="settings_sources_privacy">Solo de las apps que marques aquí. Lo que llega de
+        cualquier otra app se descarta sin mirarlo, así que no se guarda ni el texto ni el
+        importe. La app no tiene permiso de internet: nada sale de este teléfono.</string>
+    <string name="settings_sources_all_risk">Ahora mismo se leen los avisos de TODAS las apps
+        del teléfono, no solo los del banco.</string>
+    <string name="settings_sources_narrow">Dejar solo las apps marcadas</string>
+    <string name="settings_sources_choice_label">Apps a las que leer los avisos</string>
+    <string name="settings_sources_only_selected_risk">Solo se leerán las apps que marques
+        abajo. Si tu banco no está, no se guardará ningún gasto.</string>
+    <plurals name="settings_sources_count">
+        <item quantity="one">%1$d gasto guardado</item>
+        <item quantity="other">%1$d gastos guardados</item>
+    </plurals>
+    <string name="settings_sources_forget">Olvidar</string>
+    <string name="settings_sources_forget_title">¿Olvidar lo de esta app?</string>
+    <string name="settings_sources_forget_body">Se borrarán los %1$d gastos guardados de %2$s
+        y la app dejará de estar permitida. No se puede deshacer.</string>
+    <string name="settings_sources_forget_done">Se olvidó lo de %1$s</string>
+    <string name="settings_sources_empty_hint">Todavía no ha enviado nada ninguna app. En cuanto
+        una app te avise de un pago y no se guarde, vuelve aquí para marcarla.</string>
+    <string name="settings_sources_selected">Solo las apps marcadas</string>
+    <string name="settings_sources_app_unknown">Sin nombre público</string>
+    <string name="expenses_grouping_day">Día</string>
+    <string name="expenses_grouping_week">Semana</string>
+    <string name="expenses_grouping_month">Mes</string>
+    <string name="expenses_group_this_week">Esta semana</string>
+    <string name="expenses_group_last_week">Semana pasada</string>
+    <string name="expenses_group_this_month">Este mes</string>
+    <string name="expenses_group_last_month">Mes pasado</string>
+    <string name="expenses_group_week_range">%1$s – %2$s</string>
+    <string name="summary_month_average_ticket">%1$s por gasto</string>
+    <plurals name="summary_month_movements">
+        <item quantity="one">%1$d movimiento</item>
+        <item quantity="other">%1$d movimientos</item>
+    </plurals>
+    <string name="settings_privacy_policy">Política de privacidad</string>
+    <!-- OJO: hay que cambiar esta URL por la politica de privacidad real antes de
+         publicar en Google Play, que la exige tanto en la ficha como dentro de
+         la app. El dominio .example esta reservado por la RFC y nunca resuelve. -->
+    <string name="settings_privacy_policy_url" translatable="false">https://cambia-esta-url.example/politica-de-privacidad</string>
+</resources>
+
