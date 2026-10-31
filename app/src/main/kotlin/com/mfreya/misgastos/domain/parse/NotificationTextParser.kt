@@ -54,6 +54,11 @@ object NotificationTextParser {
 
         val (candidate, points) = best
         val merchant = MerchantParser.parse(combined, candidate.start, candidate.end)
+        val kind = if (IncomeDetector.looksLikeIncome(normalizedTitle, normalizedBody)) {
+            TransactionKind.INCOME
+        } else {
+            TransactionKind.EXPENSE
+        }
 
         return ParsedExpense(
             amountCents = candidate.cents,
@@ -62,6 +67,7 @@ object NotificationTextParser {
             merchantRaw = merchant.raw,
             confidence = confidenceFor(points, merchant.known),
             normalizedText = combined,
+            kind = kind,
         )
     }
 

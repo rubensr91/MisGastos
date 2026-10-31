@@ -239,4 +239,26 @@ class NotificationTextParserTest {
         val known = assertExpense("Gastaste 12,50 € en Mercadona", 1250, "Mercadona")
         assertTrue(known.merchantKnown)
     }
+
+    // --- Dinero recibido ---------------------------------------------------
+
+    @Test
+    fun `transferencia recibida se marca como ingreso`() {
+        val parsed = parse("Has recibido una transferencia de 250,00 € de Juan")
+        assertNotNull(parsed)
+        assertEquals(TransactionKind.INCOME, parsed!!.kind)
+    }
+
+    @Test
+    fun `nomina ingresada se marca como ingreso`() {
+        val parsed = parse("Te hemos ingresado 1.850,00 €. Nomina de octubre")
+        assertNotNull(parsed)
+        assertEquals(TransactionKind.INCOME, parsed!!.kind)
+    }
+
+    @Test
+    fun `un gasto normal sigue siendo gasto`() {
+        val parsed = assertExpense("Gastaste 12,50 € en Mercadona", 1250, "Mercadona")
+        assertEquals(TransactionKind.EXPENSE, parsed.kind)
+    }
 }

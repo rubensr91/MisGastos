@@ -236,6 +236,22 @@ class NotificationIngestorTest {
     }
 
     @Test
+    fun discardsIncomingMoneyWithoutStoringIt() = runBlocking {
+        val dao = FakeExpenseDao()
+        val sut = NotificationIngestor(ExpenseRepository(dao), { true })
+        val result = sut.ingest(
+            sourcePackage = "com.bank",
+            title = "Bizum",
+            body = "Bizum recibido de Maria: 20,00 EUR",
+            postedAt = 1_000L,
+            rawText = "Bizum. Bizum recibido de Maria: 20,00 EUR",
+        )
+
+        assertEquals(IngestResult.Income, result)
+        assertEquals(0, dao.count())
+    }
+
+    @Test
     fun usesRealParserEndToEnd() = runBlocking {
         val dao = FakeExpenseDao()
         val sut = NotificationIngestor(ExpenseRepository(dao), { true })

@@ -8,6 +8,7 @@ import com.mfreya.misgastos.domain.model.Expense
 import com.mfreya.misgastos.domain.parse.ExpensePreFilter
 import com.mfreya.misgastos.domain.parse.NotificationTextParser
 import com.mfreya.misgastos.domain.parse.ParsedExpense
+import com.mfreya.misgastos.domain.parse.TransactionKind
 
 sealed interface IngestResult {
     data class Inserted(val expense: Expense) : IngestResult
@@ -17,6 +18,9 @@ sealed interface IngestResult {
 
     data object Duplicate : IngestResult
     data object NotAnExpense : IngestResult
+
+    /** El aviso describe dinero que entra: nomina, bizum recibido, devolucion... */
+    data object Income : IngestResult
     data object PackageNotAllowed : IngestResult
 }
 
@@ -131,6 +135,14 @@ class NotificationIngestor(
                 )
                 return Prepared.Rejected(IngestResult.NotAnExpense)
             }
+
+        if (parsed.kind == TransactionKind.INCOME) {
+            Log.i(
+                TAG,
+                "descartada: dinero recibido, no es un gasto -> ${item.sourcePackage} | ${item.rawText.take(80)}",
+            )
+            return Prepared.Rejected(IngestResult.Income)
+        }
 
         Log.i(TAG, "parseada: ${parsed.amountCents} céntimos, ${parsed.merchant}, conf=${parsed.confidence}")
 

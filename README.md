@@ -91,6 +91,10 @@ NotificationIngestor          filtra por lista de apps permitidas
         ▼
 NotificationTextParser        (Kotlin puro, testeado en JVM)
         │                       importe en céntimos + comercio + confianza
+        │                       + tipo: gasto o dinero recibido
+        ▼
+IncomeDetector                los ingresos se descartan aquí (no se guardan)
+        │
         ▼
 ExpenseRepository  ──►  Room: tabla `expenses`  (índice único anti-duplicados)
         │
@@ -122,6 +126,31 @@ nuevas») se descarta sin guardar nada.
 Cada importe lleva un **nivel de confianza** (0-100). Los que el app no está segura de
 ellos aparecen marcados en la lista y se pueden listar en **Ajustes → Revisión** para
 corregir el comercio y la categoría a mano.
+
+### Dinero recibido: no es un gasto
+
+Si el aviso describe dinero que **entra** en la cuenta, no es un gasto y no se guarda.
+`domain/parse/IncomeDetector.kt` lo detecta antes de insertar y el ingestor lo descarta
+con el resultado `IngestResult.Income` (visible en logcat, etiqueta `MisGastosIngest`,
+como `descartada: dinero recibido, no es un gasto`). Así no deforma el total del mes, los
+presupuestos ni los gráficos.
+
+| Aviso | Por qué se descarta |
+|---|---|
+| `Has recibido una transferencia de 250,00 € de Juan` | transferencia entrante |
+| `Bizum recibido de Maria: 20,00 €` | bizum entrante |
+| `Has recibido 20,00 € de Juan` | verbo de recepción sin sustantivo de cargo |
+| `Te hemos ingresado 1.850,00 €. Nomina de octubre` | ingreso / nómina |
+| `Abono de 45,00 € en tu cuenta` | abono |
+| `Devolucion de Amazon: 24,99 €` | devolución / reembolso |
+
+La detección busca fórmulas concretas, no palabras sueltas: `Has recibido un cargo de
+5,00 € en Netflix` **sí** es un gasto, porque tras «recibido» aparece un sustantivo de
+cargo. Los avisos de gasto normales (`Gastaste`, `Has pagado`, `Compra con tarjeta`…)
+siguen guardándose igual.
+
+> Esta regla no borra ingresos que se hubieran guardado antes de añadirla: solo evita
+> que entren nuevos.
 
 ### Base de datos
 
@@ -445,10 +474,13 @@ sistema (y un enlace de reserva si el fabricante no ofrece la pantalla directa).
   módulo y cuatro objetos, y evitar una librería de inyección es una dependencia menos.
 - **Gráficos con `Canvas` de Compose**, sin librería de terceros: menos peso, menos
   dependencias que actualizar.
-- **El parser vive aislado** en `domain/parse/` (tres ficheros, sin nada de Android) y todo
-  el dominio (parser, reglas de categoría, clasificador, agrupación, cierre de mes, presupuestos
-  y cola de ingesta) está cubierto por **212 tests unitarios** que corren en la JVM en menos de
-  un segundo, sin emulador.
+- **El parser vive aislado** en `domain/parse/` (Kotlin puro, sin nada de Android) y todo
+  el dominio (parser, detección de ingresos, reglas de categoría, clasificador, agrupación,
+  cierre de mes, presupuestos y cola de ingesta) está cubierto por **229 tests unitarios** que
+  corren en la JVM en menos de un segundo, sin emulador.
+- **Solo se guardan gastos**: los avisos de dinero recibido (nómina, bizum entrante,
+  devolución, abono…) se detectan y se descartan antes de insertar, porque una fila de más
+  sumaría al total del mes y falsearía presupuestos y gráficos.
 - **Paletas Material 3 escritas a mano** en lugar de generarlas: el color de marca es el
   verde de siempre, y las paletas de claro y oscuro se pueden ajustar sin depender de lo que
   devuelva una herramienta externa.- **Filtros en SQL, agregaciones en Kotlin**: la base filtra (índices) y `StatsCalculator`
@@ -460,8 +492,9 @@ sistema (y un enlace de reserva si el fabricante no ofrece la pantalla directa).
 - **Procesar en lotes, no en tiempo real**: cada aviso por separado costaría una escritura y una
   transacción; esperando 1,5 s a agruparlos se hace una sola. Para un gasto personal, 1,5 s de
   retraso son invisibles y el ahorro es real.
-- **Sin repositorio Git configurado**: el proyecto está en `~/projects/misgatos` y se
-  puede inicializar cuando quieras.
+- **Repositorio Git**: el proyecto se versiona en
+  <https://github.com/rubensr91/MisGastos>. Las claves de firma, `local.properties` y las
+  salidas de `build/` están en `.gitignore` y no se suben.
 
 ---
 
@@ -481,9 +514,9 @@ misgatos/
 │       │   │   ├── listener/          NotificationListenerService
 │       │   │   └── ui/                Compose: onboarding, resumen, lista, ajustes, tema
 │       │   └── res/                   strings es/en, iconos, tema
-│       └── test/                      212 tests unitarios (parser, categorías, agrupación,
-│                                      cierre de mes, presupuestos, prefiltro, cola,
-│                                      fusión de avisos, gasto manual, ingestor)
+│       └── test/                      229 tests unitarios (parser, ingresos, categorías,
+│                                      agrupación, cierre de mes, presupuestos, prefiltro,
+│                                      cola, fusión de avisos, gasto manual, ingestor)
 ├── gradle/libs.versions.toml          catálogo de dependencias
 ├── keystore/                          clave de SUBIDA de Play (NO versionar)
 ├── keystore.properties                credenciales de esa clave (NO versionar)
