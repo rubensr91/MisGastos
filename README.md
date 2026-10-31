@@ -453,12 +453,13 @@ sistema (y un enlace de reserva si el fabricante no ofrece la pantalla directa).
 - **Sin telemetría, sin analíticas, sin SDKs de terceros.**
 - Lo único potencialmente identificable es `rawText`, el texto crudo de la notificación
   que el banco te manda. Puedes verlo y corregirlo en **Ajustes → Revisión**.
-- La base de datos `mis_gastos.db` está **excluida de la copia de seguridad en la nube y del
-  traspaso entre dispositivos** (`backup_rules.xml` y `data_extraction_rules.xml`).
-- **La base de datos no va cifrada.** Los datos están en el almacenamiento interno de la
-  app, al que solo accede la propia app (o un arranque en modo root). Si quisieras
-  cifrarla, el punto único de cambio es `AppDatabase`: añadir SQLCipher costaría unos 2 MB
-  más de APK y cambiaría cómo se abre la base de datos.
+- **Los datos se quedan solo en este dispositivo.** `allowBackup="false"` y las reglas de
+  `backup_rules.xml` y `data_extraction_rules.xml` excluyen todos los dominios, tanto en la
+  copia en la nube como en el traspaso entre dispositivos.
+- **La base de datos `mis_gastos.db` va cifrada con SQLCipher 4.20.0.** La clave se genera una
+  sola vez (32 bytes aleatorios) y se guarda envuelta con AES-256-GCM en el AndroidKeyStore:
+  nunca se escribe en claro en disco ni sale de la app. Al abrir una instalación anterior, la
+  base plana se migra a cifrada y se borran los ficheros antiguos y sus auxiliares WAL/SHM.
 - El acceso a notificaciones se concede de forma explícita y revocable desde los ajustes
   del sistema en cualquier momento.
 - **La app no manda ninguna notificación de aviso**: ni superas un presupuesto, ni hay recordatorios
@@ -476,7 +477,7 @@ sistema (y un enlace de reserva si el fabricante no ofrece la pantalla directa).
   dependencias que actualizar.
 - **El parser vive aislado** en `domain/parse/` (Kotlin puro, sin nada de Android) y todo
   el dominio (parser, detección de ingresos, reglas de categoría, clasificador, agrupación,
-  cierre de mes, presupuestos y cola de ingesta) está cubierto por **229 tests unitarios** que
+  cierre de mes, presupuestos y cola de ingesta) está cubierto por **240 tests unitarios** que
   corren en la JVM en menos de un segundo, sin emulador.
 - **Solo se guardan gastos**: los avisos de dinero recibido (nómina, bizum entrante,
   devolución, abono…) se detectan y se descartan antes de insertar, porque una fila de más
@@ -494,7 +495,9 @@ sistema (y un enlace de reserva si el fabricante no ofrece la pantalla directa).
   retraso son invisibles y el ahorro es real.
 - **Repositorio Git**: el proyecto se versiona en
   <https://github.com/rubensr91/MisGastos>. Las claves de firma, `local.properties` y las
-  salidas de `build/` están en `.gitignore` y no se suben.
+  salidas de `build/` están en `.gitignore` y no se suben. El cifrado de la base y el resto
+  de mejoras de privacidad viven en la rama `privacidad-p0`, que no se mezcla con `main`
+  hasta probarla en un dispositivo real.
 
 ---
 
@@ -514,9 +517,10 @@ misgatos/
 │       │   │   ├── listener/          NotificationListenerService
 │       │   │   └── ui/                Compose: onboarding, resumen, lista, ajustes, tema
 │       │   └── res/                   strings es/en, iconos, tema
-│       └── test/                      229 tests unitarios (parser, ingresos, categorías,
+│       └── test/                      240 tests unitarios (parser, ingresos, categorías,
 │                                      agrupación, cierre de mes, presupuestos, prefiltro,
-│                                      cola, fusión de avisos, gasto manual, ingestor)
+│                                      cola, fusión de avisos, gasto manual, ingestor, CSV
+│                                      y edición atómica de gastos)
 ├── gradle/libs.versions.toml          catálogo de dependencias
 ├── keystore/                          clave de SUBIDA de Play (NO versionar)
 ├── keystore.properties                credenciales de esa clave (NO versionar)

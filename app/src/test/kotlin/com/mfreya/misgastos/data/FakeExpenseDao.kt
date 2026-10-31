@@ -24,7 +24,7 @@ internal class FakeExpenseDao : ExpenseDao {
         query: String?,
         orderBy: Int,
     ): Flow<List<ExpenseEntity>> = rows.map { list ->
-        list.filter { (from == null || it.postedAt >= from) && (to == null || it.postedAt <= to) }
+        list.filter { (from == null || it.postedAt >= from) && (to == null || it.postedAt < to) }
     }
 
     override suspend fun findById(id: Long): ExpenseEntity? = rows.value.firstOrNull { it.id == id }
@@ -53,9 +53,16 @@ internal class FakeExpenseDao : ExpenseDao {
     }
 
     override suspend fun updateAmount(id: Long, amountCents: Long): Int {
-        val before = rows.value.size
-        rows.value = rows.value.map { if (it.id == id) it.copy(amountCents = amountCents) else it }
-        return before
+        var changed = 0
+        rows.value = rows.value.map {
+            if (it.id == id) {
+                changed = 1
+                it.copy(amountCents = amountCents)
+            } else {
+                it
+            }
+        }
+        return changed
     }
 
     override suspend fun deleteById(id: Long): Int {
@@ -109,9 +116,16 @@ internal class FakeExpenseDao : ExpenseDao {
         .take(limit)
 
     private fun patch(id: Long, transform: (ExpenseEntity) -> ExpenseEntity): Int {
-        val before = rows.value.size
-        rows.value = rows.value.map { if (it.id == id) transform(it) else it }
-        return before
+        var changed = 0
+        rows.value = rows.value.map {
+            if (it.id == id) {
+                changed = 1
+                transform(it)
+            } else {
+                it
+            }
+        }
+        return changed
     }
 
     override suspend fun updateFromBestNotice(

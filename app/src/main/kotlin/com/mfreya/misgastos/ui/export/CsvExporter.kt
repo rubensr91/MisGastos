@@ -3,7 +3,6 @@ package com.mfreya.misgastos.ui.export
 import android.content.Context
 import android.net.Uri
 import com.mfreya.misgastos.domain.model.Expense
-import com.mfreya.misgastos.ui.format.Money
 import java.io.OutputStreamWriter
 import java.time.Instant
 import java.time.LocalDate
@@ -20,6 +19,7 @@ object CsvExporter {
 
     private const val SEPARATOR = ','
     private const val BOM = '\uFEFF'
+    private val FORMULA_PREFIXES = charArrayOf('=', '+', '-', '@', '\t')
 
     private val header: List<String> = listOf(
         "fecha",
@@ -38,7 +38,7 @@ object CsvExporter {
 
     fun build(
         expenses: List<Expense>,
-        locale: Locale = Locale.getDefault(),
+        locale: Locale = Locale.ROOT,
     ): String {
         val zone = ZoneId.systemDefault()
         val dateFormat = DateTimeFormatter.ofLocalizedDate(FormatStyle.SHORT).withLocale(locale)
@@ -51,7 +51,12 @@ object CsvExporter {
             val cells = listOf(
                 dateFormat.format(moment),
                 timeFormat.format(moment),
-                Money.formatPlain(expense.amountCents, locale),
+                String.format(
+                    Locale.ROOT,
+                    "%d.%02d",
+                    expense.amountCents / 100,
+                    expense.amountCents % 100,
+                ),
                 expense.currency,
                 expense.merchantRaw.ifBlank { expense.merchant },
                 expense.category,
@@ -83,8 +88,14 @@ object CsvExporter {
             .replace("\r\n", " ")
             .replace("\n", " ")
             .replace("\r", " ")
-        val needsQuotes = flattened.any { it == SEPARATOR || it == '"' }
-        if (!needsQuotes) return flattened
-        return "\"${flattened.replace("\"", "\"\"")}\""
+        val trimmed = flattened.trimStart()
+        val neutralized = if (trimmed.isNotEmpty() && trimmed.first() in FORMULA_PREFIXES) {
+            "'$flattened"
+        } else {
+            flattened
+        }
+        val needsQuotes = neutralized.any { it == SEPARATOR || it == '"' }
+        if (!needsQuotes) return neutralized
+        return "\"${neutralized.replace("\"", "\"\"")}\""
     }
 }

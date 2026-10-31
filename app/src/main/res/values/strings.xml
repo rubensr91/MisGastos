@@ -203,6 +203,7 @@
     <string name="expense_amount_invalid">Escribe un importe válido, por ejemplo 12,50</string>
     <string name="expense_edited">Gasto actualizado</string>
     <string name="expense_edit_failed">No se pudo guardar el cambio</string>
+    <string name="expense_restore_failed">No se pudo deshacer: el gasto ya no se puede restaurar</string>
     <string name="settings_diag_rebind_unsupported">Esta versión de Android no permite reconectar el servicio automáticamente: vuelve a activar el acceso a notificaciones.</string>
     <string name="summary_month_close">Cierre de mes</string>
     <string name="summary_month_close_hint">%1$d meses</string>

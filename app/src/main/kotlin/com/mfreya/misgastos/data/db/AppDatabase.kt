@@ -6,6 +6,7 @@ import androidx.room.Room
 import androidx.room.RoomDatabase
 import androidx.room.migration.Migration
 import androidx.sqlite.db.SupportSQLiteDatabase
+import net.zetetic.database.sqlcipher.SupportOpenHelperFactory
 
 @Database(
     entities = [ExpenseEntity::class, MerchantCategoryEntity::class, BudgetEntity::class],
@@ -62,14 +63,20 @@ abstract class AppDatabase : RoomDatabase() {
             }
         }
 
-        fun build(context: Context): AppDatabase =
-            Room.databaseBuilder(
-                context.applicationContext,
+        fun build(context: Context): AppDatabase {
+            val appContext = context.applicationContext
+            val passphrase = DbPassphrase.getOrCreate(appContext)
+            DatabaseEncryption.loadSqlCipher()
+            DatabaseEncryption.prepare(appContext, passphrase)
+            return Room.databaseBuilder(
+                appContext,
                 AppDatabase::class.java,
                 NAME,
             )
+                .openHelperFactory(SupportOpenHelperFactory(passphrase))
                 .setJournalMode(JournalMode.WRITE_AHEAD_LOGGING)
                 .addMigrations(MIGRATION_1_2, MIGRATION_2_3)
                 .build()
+        }
     }
 }

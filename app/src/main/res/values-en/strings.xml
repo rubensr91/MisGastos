@@ -203,6 +203,7 @@
     <string name="expense_amount_invalid">Enter a valid amount, for example 12.50</string>
     <string name="expense_edited">Expense updated</string>
     <string name="expense_edit_failed">Could not save the change</string>
+    <string name="expense_restore_failed">Could not undo: this expense can no longer be restored</string>
     <string name="settings_diag_rebind_unsupported">This Android version cannot reconnect the service automatically: turn notification access off and on again.</string>
     <string name="summary_month_close">Month close</string>
     <string name="summary_month_close_hint">%1$d months</string>

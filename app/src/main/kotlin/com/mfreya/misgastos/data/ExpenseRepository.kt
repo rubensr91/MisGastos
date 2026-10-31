@@ -290,6 +290,33 @@ class ExpenseRepository(
         return dao.updateAmount(id, amountCents) > 0
     }
 
+    /**
+     * Guarda importe, comercio y categoria en una sola transaccion. Devuelve `false` si el
+     * importe no se pudo aplicar (fila borrada o choque con el indice unico), en cuyo caso no
+     * se toca nada mas. La categoria se aprende con el comercio NUEVO.
+     */
+    suspend fun updateExpense(
+        id: Long,
+        amountCents: Long,
+        merchant: String,
+        category: String,
+    ): Boolean {
+        if (amountCents <= 0L) return false
+        val clean = merchant.trim().take(48)
+        val normalized = Category.normalize(category)
+        suspend fun apply(): Boolean {
+            if (dao.updateAmount(id, amountCents) <= 0) return false
+            if (clean.isNotEmpty()) dao.updateMerchant(id, clean)
+            dao.updateCategory(id, normalized)
+            return true
+        }
+        val ok = database?.withTransaction { apply() } ?: apply()
+        if (ok && clean.isNotEmpty() && normalized != Category.UNCLASSIFIED) {
+            classifier?.learn(clean, normalized)
+        }
+        return ok
+    }
+
     suspend fun delete(id: Long): Boolean = dao.deleteById(id) > 0
 
     suspend fun restore(expense: Expense): Boolean =

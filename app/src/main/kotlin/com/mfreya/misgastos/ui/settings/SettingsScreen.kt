@@ -81,7 +81,9 @@ import com.mfreya.misgastos.ui.format.categoryLabel
 import com.mfreya.misgastos.ui.support.NotificationAccess
 import com.mfreya.misgastos.ui.support.appLabelOrPackage
 import com.mfreya.misgastos.ui.theme.SectionOverline
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -154,10 +156,13 @@ fun SettingsScreen(
     ) { uri ->
         if (uri != null) {
             scope.launch {
-                val rows = viewModel.allExpenses()
+                val (rows, csv) = withContext(Dispatchers.IO) {
+                    val loaded = viewModel.allExpenses()
+                    loaded to CsvExporter.build(loaded)
+                }
                 val message = when {
                     rows.isEmpty() -> exportEmptyMessage
-                    CsvExporter.write(context, uri, CsvExporter.build(rows)) -> exportDoneMessage
+                    CsvExporter.write(context, uri, csv) -> exportDoneMessage
                     else -> exportFailedMessage
                 }
                 snackbarHostState.showSnackbar(message)

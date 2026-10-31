@@ -121,6 +121,7 @@ fun ExpenseListScreen(modifier: Modifier = Modifier) {
     val scope = rememberCoroutineScope()
     val deletedMessage = stringResource(R.string.expenses_deleted)
     val undoLabel = stringResource(R.string.common_undo)
+    val restoreFailedMessage = stringResource(R.string.expense_restore_failed)
     val editedMessage = stringResource(R.string.expense_edited)
     val editFailedMessage = stringResource(R.string.expense_edit_failed)
     val createdMessage = stringResource(R.string.expense_create_done)
@@ -267,7 +268,13 @@ fun ExpenseListScreen(modifier: Modifier = Modifier) {
                                 message = deletedMessage,
                                 actionLabel = undoLabel,
                             )
-                            if (result == SnackbarResult.ActionPerformed) viewModel.restore(expense)
+                            if (result == SnackbarResult.ActionPerformed) {
+                                viewModel.restore(expense) { restored ->
+                                    if (!restored) {
+                                        scope.launch { snackbarHostState.showSnackbar(restoreFailedMessage) }
+                                    }
+                                }
+                            }
                         }
                     },
                 ) {
