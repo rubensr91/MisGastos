@@ -146,8 +146,10 @@ presupuestos ni los gráficos.
 
 La detección busca fórmulas concretas, no palabras sueltas: `Has recibido un cargo de
 5,00 € en Netflix` **sí** es un gasto, porque tras «recibido» aparece un sustantivo de
-cargo. Los avisos de gasto normales (`Gastaste`, `Has pagado`, `Compra con tarjeta`…)
-siguen guardándose igual.
+cargo. Tampoco son ingresos los avisos que parecen un abono pero hablan de pagar algo:
+`Abono de la factura de la luz`, `Ingreso por recibo de hipoteca` o `Abono por cuota del
+seguro` se quedan como gasto. Los avisos de gasto normales (`Gastaste`, `Has pagado`,
+`Compra con tarjeta`…) siguen guardándose igual.
 
 > Esta regla no borra ingresos que se hubieran guardado antes de añadirla: solo evita
 > que entren nuevos.
@@ -185,9 +187,14 @@ número de la tarjeta en el cuerpo (`45,00 € con Trade Republic Visa Card •�
 
 Antes se guardaban los dos y el total salía **duplicado**. Ahora, si llega un aviso con el
 **mismo importe** que un gasto guardado en los últimos **30 segundos**
-(`NotificationIngestor.MERGE_WINDOW_MILLIS`), se entiende que es el mismo pago y se **combinan
-en una sola fila** en lugar de crear otra. Da igual el orden de llegada: el mejor dato gana
-tanto si el aviso nuevo es el bueno como si es el que ya estaba guardado.
+(`NotificationIngestor.MERGE_WINDOW_MILLIS`) **y ambos avisos hablan del mismo comercio**, se
+entiende que es el mismo pago y se **combinan en una sola fila** en lugar de crear otra. Da
+igual el orden de llegada: el mejor dato gana tanto si el aviso nuevo es el bueno como si es
+el que ya estaba guardado.
+
+El comercio se compara normalizado (minúsculas, sin tildes ni signos): `Mercadona` y
+`MERCADONA` son el mismo, pero `Mercadona` y `REPSOL` no. Si alguno de los dos avisos no trae
+comercio reconocible, la comparación no descarta la fusión.
 
 Cada campo se queda con el aviso que mejor lo trajo (`domain/payment/PaymentMerger.kt`):
 
@@ -200,11 +207,12 @@ Cada campo se queda con el aviso que mejor lo trajo (`domain/payment/PaymentMerg
 | confianza | la mayor de las dos |
 | categoría | se **recalcula** con el comercio ganador, así que también se aplica una regla nueva o una corrección tuya |
 
-> **Consecuencia asumida:** dos compras **del mismo importe** en menos de 30 segundos se
-> fusionan en una sola fila, aunque sean en sitios distintos. Con 30 segundos el margen es
-> suficiente para los dos avisos de un mismo pago y muy corto para que te ocurra por error.
+> **Consecuencia asumida:** dos compras del **mismo importe y mismo comercio** en menos de 30
+> segundos se fusionan en una sola fila. Con 30 segundos el margen es suficiente para los dos
+> avisos de un mismo pago y muy corto para que te ocurra por error. Dos avisos del mismo
+> importe en comercios distintos ya **no** se mezclan.
 > Los descartes y combinaciones quedan en logcat con la etiqueta `MisGastosIngest`
-> (`combinada con la id=…`).
+> (`combinada con la id=…`), sin importes, comercios ni texto de la notificación.
 
 ### Categorización automática
 
@@ -377,8 +385,9 @@ Cada pantalla se queda asi con su altura real.
   - **Cierre de mes** — una tabla con los últimos **3, 6 o 12 meses** (se elige en la propia
     sección): total de cada mes, número de movimientos, ticket medio y variación en porcentaje
     frente al mes anterior (verde si gastaste menos, roja si más), más el total del año en
-    curso. Los meses sin gastos no se inventan: se saltan. Todo el cálculo vive en
-    `domain/MonthClose.kt` (Kotlin puro, con tests).
+    curso. Los meses sin gastos dentro del rango se muestran con total y ticket medio a cero,
+    para que el eje temporal no dé saltos; por delante del mes más antiguo con datos no se
+    inventa nada. Todo el cálculo vive en `domain/MonthClose.kt` (Kotlin puro, con tests).
   - **Presupuestos** — si has puesto uno o más límites mensuales por categoría, aquí aparece cada
     uno con su barra: verde por debajo del 85 %, ámbar al acercarse y rojo al pasarse, con lo que
     queda o lo que te has pasado. **Sin avisos ni notificaciones**: la app no te avisa de nada,
@@ -453,12 +462,13 @@ sistema (y un enlace de reserva si el fabricante no ofrece la pantalla directa).
 - **Sin telemetría, sin analíticas, sin SDKs de terceros.**
 - Lo único potencialmente identificable es `rawText`, el texto crudo de la notificación
   que el banco te manda. Puedes verlo y corregirlo en **Ajustes → Revisión**.
-- La base de datos `mis_gastos.db` está **excluida de la copia de seguridad en la nube y del
-  traspaso entre dispositivos** (`backup_rules.xml` y `data_extraction_rules.xml`).
-- **La base de datos no va cifrada.** Los datos están en el almacenamiento interno de la
-  app, al que solo accede la propia app (o un arranque en modo root). Si quisieras
-  cifrarla, el punto único de cambio es `AppDatabase`: añadir SQLCipher costaría unos 2 MB
-  más de APK y cambiaría cómo se abre la base de datos.
+- **Los datos se quedan solo en este dispositivo.** `allowBackup="false"` y las reglas de
+  `backup_rules.xml` y `data_extraction_rules.xml` excluyen todos los dominios, tanto en la
+  copia en la nube como en el traspaso entre dispositivos.
+- **La base de datos `mis_gastos.db` va cifrada con SQLCipher 4.20.0.** La clave se genera una
+  sola vez (32 bytes aleatorios) y se guarda envuelta con AES-256-GCM en el AndroidKeyStore:
+  nunca se escribe en claro en disco ni sale de la app. Al abrir una instalación anterior, la
+  base plana se migra a cifrada y se borran los ficheros antiguos y sus auxiliares WAL/SHM.
 - El acceso a notificaciones se concede de forma explícita y revocable desde los ajustes
   del sistema en cualquier momento.
 - **La app no manda ninguna notificación de aviso**: ni superas un presupuesto, ni hay recordatorios
@@ -476,7 +486,7 @@ sistema (y un enlace de reserva si el fabricante no ofrece la pantalla directa).
   dependencias que actualizar.
 - **El parser vive aislado** en `domain/parse/` (Kotlin puro, sin nada de Android) y todo
   el dominio (parser, detección de ingresos, reglas de categoría, clasificador, agrupación,
-  cierre de mes, presupuestos y cola de ingesta) está cubierto por **229 tests unitarios** que
+  cierre de mes, presupuestos y cola de ingesta) está cubierto por **243 tests unitarios** que
   corren en la JVM en menos de un segundo, sin emulador.
 - **Solo se guardan gastos**: los avisos de dinero recibido (nómina, bizum entrante,
   devolución, abono…) se detectan y se descartan antes de insertar, porque una fila de más
@@ -494,7 +504,9 @@ sistema (y un enlace de reserva si el fabricante no ofrece la pantalla directa).
   retraso son invisibles y el ahorro es real.
 - **Repositorio Git**: el proyecto se versiona en
   <https://github.com/rubensr91/MisGastos>. Las claves de firma, `local.properties` y las
-  salidas de `build/` están en `.gitignore` y no se suben.
+  salidas de `build/` están en `.gitignore` y no se suben. El cifrado de la base y el resto
+  de mejoras de privacidad viven en la rama `privacidad-p0`, que no se mezcla con `main`
+  hasta probarla en un dispositivo real.
 
 ---
 
@@ -514,9 +526,10 @@ misgatos/
 │       │   │   ├── listener/          NotificationListenerService
 │       │   │   └── ui/                Compose: onboarding, resumen, lista, ajustes, tema
 │       │   └── res/                   strings es/en, iconos, tema
-│       └── test/                      229 tests unitarios (parser, ingresos, categorías,
+│       └── test/                      243 tests unitarios (parser, ingresos, categorías,
 │                                      agrupación, cierre de mes, presupuestos, prefiltro,
-│                                      cola, fusión de avisos, gasto manual, ingestor)
+│                                      cola, fusión de avisos, gasto manual, ingestor, CSV
+│                                      y edición atómica de gastos)
 ├── gradle/libs.versions.toml          catálogo de dependencias
 ├── keystore/                          clave de SUBIDA de Play (NO versionar)
 ├── keystore.properties                credenciales de esa clave (NO versionar)

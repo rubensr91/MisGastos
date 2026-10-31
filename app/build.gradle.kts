@@ -126,6 +126,8 @@ dependencies {
     implementation(libs.androidx.navigation.compose)
     implementation(libs.androidx.room.runtime)
     implementation(libs.androidx.room.ktx)
+    // Cifrado de la base de datos local (AES-256). La clave vive en el Android Keystore.
+    implementation("net.zetetic:sqlcipher-android:4.20.0@aar")
     ksp(libs.androidx.room.compiler)
     implementation(libs.kotlinx.coroutines.android)
 

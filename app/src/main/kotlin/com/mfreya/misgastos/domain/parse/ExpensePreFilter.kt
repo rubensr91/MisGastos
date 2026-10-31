@@ -17,9 +17,6 @@ package com.mfreya.misgastos.domain.parse
  */
 object ExpensePreFilter {
 
-    private val SPENDING_VERB = Regex(
-        "(?i)\\b(gastaste|gastado|pagaste|pagado|compra|pago|importe|cargo|transacci[oó]n)\\b",
-    )
     private val CURRENCY_MARK = Regex("(?i)(€|\\beur\\b)")
     private val DIGIT = Regex("\\d")
 
@@ -29,7 +26,7 @@ object ExpensePreFilter {
     }
 
     private fun hasEvidence(text: String?): Boolean =
-        text != null && (SPENDING_VERB.containsMatchIn(text) || CURRENCY_MARK.containsMatchIn(text))
+        text != null && (SpendingHints.VERB.containsMatchIn(text) || CURRENCY_MARK.containsMatchIn(text))
 
     private fun hasDigit(text: String?): Boolean = text != null && DIGIT.containsMatchIn(text)
 }

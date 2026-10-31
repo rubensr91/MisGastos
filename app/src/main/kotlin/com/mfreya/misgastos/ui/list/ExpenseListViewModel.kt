@@ -106,8 +106,8 @@ class ExpenseListViewModel(private val repository: ExpenseRepository) : ViewMode
         viewModelScope.launch { repository.delete(expense.id) }
     }
 
-    fun restore(expense: Expense) {
-        viewModelScope.launch { repository.restore(expense) }
+    fun restore(expense: Expense, onResult: (Boolean) -> Unit = {}) {
+        viewModelScope.launch { onResult(repository.restore(expense)) }
     }
 
     fun updateCategory(expense: Expense, category: String) {
@@ -129,10 +129,7 @@ class ExpenseListViewModel(private val repository: ExpenseRepository) : ViewMode
     ) {
         viewModelScope.launch {
             val ok = runCatching {
-                val changed = repository.updateAmount(expense.id, amountCents)
-                repository.updateMerchant(expense.id, merchant)
-                repository.setCategory(expense, category)
-                changed
+                repository.updateExpense(expense.id, amountCents, merchant, category)
             }.getOrDefault(false)
             onResult(ok)
         }

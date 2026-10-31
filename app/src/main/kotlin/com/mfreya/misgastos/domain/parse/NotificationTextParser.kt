@@ -19,10 +19,6 @@ object NotificationTextParser {
     private const val SCORE_DECIMALS = 15
     private const val MIN_SCORE = 30
 
-    private val SPENDING_VERB = Regex(
-        "(?i)\\b(gastaste|gastado|pagaste|pagado|compra|pago|importe|cargo|transacci[oó]n)\\b"
-    )
-
     private val EUR_WORD = Regex("(?i)\\beur\\b")
     private val HARD_SPACES = Regex("[\u00A0\u202F\u2007\u2009]")
     private val HORIZONTAL_SPACES = Regex("[ \\t]+")
@@ -43,8 +39,8 @@ object NotificationTextParser {
         }
         if (combined.isBlank()) return null
 
-        val hasVerb = SPENDING_VERB.containsMatchIn(normalizedTitle) ||
-            SPENDING_VERB.containsMatchIn(normalizedBody)
+        val hasVerb = SpendingHints.VERB.containsMatchIn(normalizedTitle) ||
+            SpendingHints.VERB.containsMatchIn(normalizedBody)
 
         val best = AmountParser.findAll(combined)
             .map { it to score(it, hasVerb) }

@@ -71,6 +71,15 @@ class IncomeDetectorTest {
     fun `aviso de cargo no se confunde con ingreso`() {
         assertFalse(isIncome("Has recibido un cargo de 5,00 € en Netflix"))
         assertFalse(isIncome("Has recibido una compra de 5,00 € en Netflix"))
+        assertFalse(isIncome("Has recibido un aviso de pago de 30,00 €"))
+        assertFalse(isIncome("Has recibido un recordatorio de pago"))
+    }
+
+    @Test
+    fun `abono o ingreso asociado a un recibo no es dinero que entra`() {
+        assertFalse(isIncome("Abono de la factura de la luz: 60,00 €"))
+        assertFalse(isIncome("Ingreso por recibo de hipoteca: 800,00 €"))
+        assertFalse(isIncome("Abono por cuota del seguro: 45,00 €"))
     }
 
     @Test

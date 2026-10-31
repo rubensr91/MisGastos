@@ -89,9 +89,8 @@ class NotificationIngestor(
                     is InsertOutcome.Merged -> {
                         Log.i(
                             TAG,
-                            "combinada con la id=${outcome.expense.id}: mismo importe " +
-                                "${batch[index].parsed.amountCents} céntimos; ahora " +
-                                "${outcome.expense.sourcePackage} | ${outcome.expense.merchant} | " +
+                            "combinada con la id=${outcome.expense.id}; " +
+                                "app=${outcome.expense.sourcePackage}; " +
                                 "conf=${outcome.expense.parseConfidence}",
                         )
                         IngestResult.Merged(outcome.expense)
@@ -122,7 +121,7 @@ class NotificationIngestor(
         if (!ExpensePreFilter.looksLikeExpense(item.title, item.body)) {
             Log.i(
                 TAG,
-                "descartada: sin pistas de gasto -> ${item.sourcePackage} | ${item.rawText.take(80)}",
+                "descartada: sin pistas de gasto -> ${item.sourcePackage}",
             )
             return Prepared.Rejected(IngestResult.NotAnExpense)
         }
@@ -131,7 +130,7 @@ class NotificationIngestor(
             ?: run {
                 Log.i(
                     TAG,
-                    "descartada: no parece un gasto -> ${item.sourcePackage} | ${item.rawText}",
+                    "descartada: no parece un gasto -> ${item.sourcePackage}",
                 )
                 return Prepared.Rejected(IngestResult.NotAnExpense)
             }
@@ -139,12 +138,12 @@ class NotificationIngestor(
         if (parsed.kind == TransactionKind.INCOME) {
             Log.i(
                 TAG,
-                "descartada: dinero recibido, no es un gasto -> ${item.sourcePackage} | ${item.rawText.take(80)}",
+                "descartada: dinero recibido, no es un gasto -> ${item.sourcePackage}",
             )
             return Prepared.Rejected(IngestResult.Income)
         }
 
-        Log.i(TAG, "parseada: ${parsed.amountCents} céntimos, ${parsed.merchant}, conf=${parsed.confidence}")
+        Log.i(TAG, "parseada: conf=${parsed.confidence}")
 
         return Prepared.Accepted(
             BatchIngest(

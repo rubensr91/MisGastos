@@ -220,4 +220,39 @@ class ExpenseRepositoryManualTest {
         }
         assertEquals(0, dao.count())
     }
+
+    @Test
+    fun dosAvisosDelMismoImporteDeComerciosDistintosNoSeFunden() = runBlocking {
+        val dao = FakeExpenseDao()
+        val sut = repository(dao)
+        var comercio = "Mercadona"
+        val aviso = NotificationIngestor(sut, { true }) { _, _ ->
+            ParsedExpense(1_500L, "EUR", comercio, comercio, 95, "")
+        }
+
+        val primero = aviso.ingest("de.banco", "Mercadona", "Gastaste 15,00 EUR en Mercadona", 60_000L, "banco", 60_000L)
+        comercio = "REPSOL"
+        val segundo = aviso.ingest("de.banco", "REPSOL", "Gastaste 15,00 EUR en REPSOL", 61_000L, "banco", 61_000L)
+
+        assertTrue(primero is IngestResult.Inserted)
+        assertTrue(segundo is IngestResult.Inserted)
+        assertEquals(2, dao.count())
+    }
+
+    @Test
+    fun dosAvisosDelMismoComercioConMayusculasSeFunden() = runBlocking {
+        val dao = FakeExpenseDao()
+        val sut = repository(dao)
+        var comercio = "Mercadona"
+        val aviso = NotificationIngestor(sut, { true }) { _, _ ->
+            ParsedExpense(1_500L, "EUR", comercio, comercio, 95, "")
+        }
+
+        aviso.ingest("de.banco", "Mercadona", "Gastaste 15,00 EUR en Mercadona", 60_000L, "banco", 60_000L)
+        comercio = "MERCADONA"
+        val segundo = aviso.ingest("de.banco", "MERCADONA", "Gastaste 15,00 EUR en MERCADONA", 61_000L, "banco", 61_000L)
+
+        assertTrue(segundo is IngestResult.Merged)
+        assertEquals(1, dao.count())
+    }
 }
