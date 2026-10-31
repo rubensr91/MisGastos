@@ -1,6 +1,8 @@
 package com.mfreya.misgastos.domain.payment
 
 import com.mfreya.misgastos.domain.parse.ParsedExpense
+import java.text.Normalizer
+import java.util.Locale
 
 /**
  * Un aviso de pago ya parseado junto a su procedencia. Es lo que hace falta para decidir de
@@ -46,6 +48,9 @@ object PaymentMerger {
 
     /** Peso de que el comercio sea conocido: manda sobre cualquier otra diferencia. */
     private const val KNOWN_MERCHANT_WEIGHT = 10_000
+    private val DIACRITICS = Regex("\\p{M}+")
+    private val NON_ALPHANUMERIC = Regex("[^a-z0-9]+")
+    private val WHITESPACE = Regex("\\s+")
 
     /**
      * Puntuacion de calidad de un aviso: primero si sabe el comercio, luego lo que confio el
@@ -59,6 +64,19 @@ object PaymentMerger {
 
     fun better(existing: MergeCandidate, incoming: MergeCandidate): MergeCandidate =
         if (quality(incoming) >= quality(existing)) incoming else existing
+
+    fun sameMerchant(existing: MergeCandidate, incoming: MergeCandidate): Boolean {
+        if (!existing.parsed.merchantKnown || !incoming.parsed.merchantKnown) return true
+        return normalizeMerchant(existing.parsed.merchant) == normalizeMerchant(incoming.parsed.merchant)
+    }
+
+    private fun normalizeMerchant(value: String): String {
+        val folded = Normalizer.normalize(value.lowercase(Locale.ROOT), Normalizer.Form.NFD)
+            .replace(DIACRITICS, "")
+            .replace(NON_ALPHANUMERIC, " ")
+            .trim()
+        return WHITESPACE.replace(folded, " ")
+    }
 
     fun merge(existing: MergeCandidate, incoming: MergeCandidate): MergedFields {
         val winner = better(existing, incoming)

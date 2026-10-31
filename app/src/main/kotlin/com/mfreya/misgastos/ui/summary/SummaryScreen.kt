@@ -388,7 +388,7 @@ private fun MonthCloseSection(
         SectionHeader(
             title = stringResource(R.string.summary_month_close),
             action = {
-                HeaderHint(stringResource(R.string.summary_month_close_hint, range))
+                HeaderHint(pluralStringResource(R.plurals.summary_month_close_hint, range, range))
             },
         )
         Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
@@ -396,7 +396,15 @@ private fun MonthCloseSection(
                 FilterChip(
                     selected = range == option,
                     onClick = { onRangeChange(option) },
-                    label = { Text(text = stringResource(R.string.summary_month_close_option, option)) },
+                    label = {
+                        Text(
+                            text = pluralStringResource(
+                                R.plurals.summary_month_close_option,
+                                option,
+                                option,
+                            ),
+                        )
+                    },
                     leadingIcon = if (range == option) {
                         {
                             Icon(

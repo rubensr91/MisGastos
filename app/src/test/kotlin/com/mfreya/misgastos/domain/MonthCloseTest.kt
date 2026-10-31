@@ -79,17 +79,19 @@ class MonthCloseTest {
     }
 
     @Test
-    fun noInventaMesesSinGastos() {
+    fun rellenaLosMesesVaciosEntreElActualYElUltimoConDatos() {
         val report = MonthCloseCalculator.build(
             expenses = listOf(expense("2026-03", 1_000), expense("2025-12", 2_000)),
             months = 12,
             today = today,
         )
-        // Hay huecos (febrero y enero de 2026): se saltan, no se rellenan con meses a cero.
         assertEquals(
-            listOf("2026-03", "2025-12"),
+            listOf("2026-03", "2026-02", "2026-01", "2025-12"),
             report.months.map { it.periodStart.toString().substring(0, 7) },
         )
+        val empty = report.months.filter { it.count == 0 }
+        assertEquals(2, empty.size)
+        assertTrue(empty.all { it.totalCents == 0L && it.averageCents == 0L })
     }
 
     @Test

@@ -66,17 +66,21 @@ object MonthCloseCalculator {
             .associate { group -> group.periodStart to group }
 
         val currentMonth = today.withDayOfMonth(1)
+        val monthsWithData = (0 until window).filter { step ->
+            byMonth.containsKey(currentMonth.minusMonths(step.toLong()))
+        }
+        val oldestWithData = monthsWithData.maxOrNull() ?: -1
         val recent = buildList {
-            for (step in 0 until window) {
+            for (step in 0..oldestWithData) {
                 val start = currentMonth.minusMonths(step.toLong())
-                val group = byMonth[start] ?: continue
+                val group = byMonth[start]
                 val previous = byMonth[start.minusMonths(1)]?.totalCents ?: 0L
                 add(
                     MonthClose(
                         periodStart = start,
-                        totalCents = group.totalCents,
-                        count = group.count,
-                        averageCents = group.averageCents(),
+                        totalCents = group?.totalCents ?: 0L,
+                        count = group?.count ?: 0,
+                        averageCents = group?.averageCents() ?: 0L,
                         previousTotalCents = previous,
                     ),
                 )

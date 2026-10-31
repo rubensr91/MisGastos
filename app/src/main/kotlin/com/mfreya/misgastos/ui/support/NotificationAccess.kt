@@ -7,7 +7,6 @@ import android.net.Uri
 import android.os.PowerManager
 import android.provider.Settings
 import android.service.notification.NotificationListenerService
-import android.service.notification.StatusBarNotification
 import androidx.core.app.NotificationManagerCompat
 import com.mfreya.misgastos.listener.GastoNotificationListener
 import com.mfreya.misgastos.listener.ListenerState
@@ -91,15 +90,6 @@ object NotificationAccess {
         UNSUPPORTED,
     }
 
-    /**
-     * Pide al sistema que vuelva a enlazar el servicio de escucha si el usuario concedio el
-     * permiso pero el servicio no esta conectado. Es la unica forma de recuperarlo sin que el
-     * usuario toque nada, porque `NotificationListenerService` no se relanza solo: si el
-     * sistema lo desenlaza, la app se quedaria sin capturar gastos en silencio.
-     *
-     * `requestRebind` es estatico y existe desde Android 13 (API 33); en versiones anteriores
-     * se devuelve [RebindResult.UNSUPPORTED] para poder avisar al usuario en Ajustes.
-     */
     /** Si el sistema permite pedir que se vuelva a enlazar el servicio (Android 13 o posterior). */
     fun canRebind(): Boolean = RebindCompat.isSupported()
 
@@ -153,10 +143,3 @@ fun Context.appLabelFor(packageName: String): String? {
 
 /** Como [appLabelFor], pero nunca devuelve null: cae en el propio identificador. */
 fun Context.appLabelOrPackage(packageName: String): String = appLabelFor(packageName) ?: packageName
-
-/** Paquetes que han publicado alguna notificación, preguntándoselo al sistema en vez de guardarlos. */
-fun Context.listenerPackages(): Set<String> =
-    runCatching { NotificationManagerCompat.getEnabledListenerPackages(this) }.getOrDefault(emptySet())
-
-@Suppress("unused")
-fun StatusBarNotification.appLabel(context: Context): String = context.appLabelOrPackage(packageName)

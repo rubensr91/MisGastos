@@ -14,10 +14,10 @@
     <string name="common_undo">Deshacer</string>
     <string name="common_continue">Continuar</string>
     <string name="common_start">Empezar</string>
-    <string name="common_back">Atrás</string>
+    
     <string name="common_save">Guardar</string>
-    <string name="common_close">Cerrar</string>
-    <string name="common_optional">opcional</string>
+    
+    
 
     <!-- Navegación -->
     <string name="nav_summary">Resumen</string>
@@ -42,7 +42,7 @@
     <string name="onboarding_test_button_disabled">Necesitas el permiso de avisos para enviar la prueba.</string>
 
     <string name="onboarding_step_format">Paso %1$d de %2$d</string>
-    <string name="onboarding_next">Siguiente</string>
+    
     <string name="onboarding_skip">Saltar</string>
 
     <!-- Ajustes -->
@@ -52,11 +52,11 @@
     <string name="settings_access_missing">No concedido</string>
     <string name="settings_open_access">Abrir ajustes del sistema</string>
 
-    <string name="settings_section_sources">Apps emisoras</string>
+    
     <string name="settings_sources_all">Todas las apps</string>
     <string name="settings_sources_all_desc">Se leerán los avisos de cualquier app del teléfono.</string>
-    <string name="settings_sources_selected_desc">Solo se leerán las apps marcadas abajo.</string>
-    <string name="settings_sources_empty">Aún no se ha detectado ninguna app que envíe notificaciones de gasto.</string>
+    
+    
 
     <string name="settings_section_diagnostics">Diagnóstico</string>
     <string name="settings_diag_service_ok">Servicio de escucha conectado</string>
@@ -64,7 +64,7 @@
     <string name="settings_diag_battery_ok">Optimización de batería no lo restringe</string>
     <string name="settings_diag_battery_restricted">La optimización de batería puede detener el servicio</string>
     <string name="settings_diag_battery_open">Revisar optimización de batería</string>
-    <string name="settings_diag_app_unknown">App desconocida (%1$s)</string>
+    
     <string name="settings_diag_suggested">Sugeridas</string>
     <string name="settings_diag_advice_battery">Si el servicio se detiene solo, excluye Mis Gastos de la optimización de batería y de las apps que matan procesos en segundo plano.</string>
     <string name="settings_diag_advice_no_data">Si no entra ningún gasto, comprueba que el banco envíe la notificación y que su app esté marcada en "Apps emisoras".</string>
@@ -76,7 +76,10 @@
     </plurals>
     <string name="settings_delete_all">Borrar todos los gastos</string>
     <string name="settings_delete_all_confirm_title">¿Borrar todo?</string>
-    <string name="settings_delete_all_confirm_body">Se eliminarán los %1$d gastos guardados en este teléfono. No hay copia en ningún sitio: no se puede deshacer.</string>
+    <plurals name="settings_delete_all_confirm_body">
+        <item quantity="one">Se eliminará el gasto guardado en este teléfono. No hay copia en ningún sitio: no se puede deshacer.</item>
+        <item quantity="other">Se eliminarán los %1$d gastos guardados en este teléfono. No hay copia en ningún sitio: no se puede deshacer.</item>
+    </plurals>
     <string name="settings_delete_all_confirm_action">Sí, borrar todo</string>
     <string name="settings_deleted_all">Todos los gastos han sido borrados.</string>
 
@@ -91,9 +94,9 @@
 
     <!-- Resumen -->
     <string name="summary_title">Resumen</string>
-    <string name="summary_today">Hoy</string>
-    <string name="summary_month">Este mes</string>
-    <string name="summary_previous_month">Mes anterior</string>
+    
+    
+    
     <string name="summary_vs_previous">%1$s frente al mes anterior</string>
     <string name="summary_up">%1$s más que el mes anterior</string>
     <string name="summary_down">%1$s menos que el mes anterior</string>
@@ -115,14 +118,14 @@
         <item quantity="other">%1$d gastos · %2$s</item>
     </plurals>
 
-    <string name="expense_needs_review">Conviene revisar</string>
+    
     <string name="expense_category_label">Categoría</string>
     <string name="expense_category_new">Nueva categoría</string>
     <string name="expense_category_edit">Editar gasto</string>
     <string name="expense_category_hint">Nombre de la categoría</string>
     <string name="expense_merchant_hint">Comercio</string>
     <string name="expense_raw_text">Texto original</string>
-    <string name="expense_source">Origen</string>
+    
     <string name="expense_delete_confirm_title">¿Eliminar este gasto?</string>
     <string name="expense_delete_confirm_body">Se borrará de la lista. Puedes deshacerlo con el aviso que aparecerá abajo.</string>
 
@@ -188,7 +191,7 @@
     <!-- Rediseño de la lista -->
     <string name="expenses_group_today">Hoy</string>
     <string name="expenses_group_yesterday">Ayer</string>
-    <string name="expenses_group_total">Total del día</string>
+    
 
     <!-- Onboarding -->
     <string name="onboarding_welcome_eyebrow">Tus gastos, automáticos</string>
@@ -206,8 +209,14 @@
     <string name="expense_restore_failed">No se pudo deshacer: el gasto ya no se puede restaurar</string>
     <string name="settings_diag_rebind_unsupported">Esta versión de Android no permite reconectar el servicio automáticamente: vuelve a activar el acceso a notificaciones.</string>
     <string name="summary_month_close">Cierre de mes</string>
-    <string name="summary_month_close_hint">%1$d meses</string>
-    <string name="summary_month_close_option">%1$d meses</string>
+    <plurals name="summary_month_close_hint">
+        <item quantity="one">%1$d mes</item>
+        <item quantity="other">%1$d meses</item>
+    </plurals>
+    <plurals name="summary_month_close_option">
+        <item quantity="one">%1$d mes</item>
+        <item quantity="other">%1$d meses</item>
+    </plurals>
     <string name="summary_month_close_year">Total de %1$d</string>
     <string name="summary_month_variation_up">+%1$d %%</string>
     <string name="summary_month_variation_down">-%1$d %%</string>
@@ -245,7 +254,7 @@
     <string name="settings_sources_all_risk">Ahora mismo se leen los avisos de TODAS las apps
         del teléfono, no solo los del banco.</string>
     <string name="settings_sources_narrow">Dejar solo las apps marcadas</string>
-    <string name="settings_sources_choice_label">Apps a las que leer los avisos</string>
+    
     <string name="settings_sources_only_selected_risk">Solo se leerán las apps que marques
         abajo. Si tu banco no está, no se guardará ningún gasto.</string>
     <plurals name="settings_sources_count">
@@ -254,8 +263,10 @@
     </plurals>
     <string name="settings_sources_forget">Olvidar</string>
     <string name="settings_sources_forget_title">¿Olvidar lo de esta app?</string>
-    <string name="settings_sources_forget_body">Se borrarán los %1$d gastos guardados de %2$s
-        y la app dejará de estar permitida. No se puede deshacer.</string>
+    <plurals name="settings_sources_forget_body">
+        <item quantity="one">Se borrará el gasto guardado de %1$s y la app dejará de estar permitida. No se puede deshacer.</item>
+        <item quantity="other">Se borrarán los %1$d gastos guardados de %2$s y la app dejará de estar permitida. No se puede deshacer.</item>
+    </plurals>
     <string name="settings_sources_forget_done">Se olvidó lo de %1$s</string>
     <string name="settings_sources_empty_hint">Todavía no ha enviado nada ninguna app. En cuanto
         una app te avise de un pago y no se guarde, vuelve aquí para marcarla.</string>

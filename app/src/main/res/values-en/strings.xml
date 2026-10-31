@@ -14,10 +14,10 @@
     <string name="common_undo">Undo</string>
     <string name="common_continue">Continue</string>
     <string name="common_start">Get started</string>
-    <string name="common_back">Back</string>
+    
     <string name="common_save">Save</string>
-    <string name="common_close">Close</string>
-    <string name="common_optional">optional</string>
+    
+    
 
     <!-- Navigation -->
     <string name="nav_summary">Summary</string>
@@ -42,7 +42,7 @@
     <string name="onboarding_test_button_disabled">Notification permission is needed to send the test.</string>
 
     <string name="onboarding_step_format">Step %1$d of %2$d</string>
-    <string name="onboarding_next">Next</string>
+    
     <string name="onboarding_skip">Skip</string>
 
     <!-- Settings -->
@@ -52,11 +52,11 @@
     <string name="settings_access_missing">Not granted</string>
     <string name="settings_open_access">Open system settings</string>
 
-    <string name="settings_section_sources">Source apps</string>
+    
     <string name="settings_sources_all">All apps</string>
     <string name="settings_sources_all_desc">Notifications from every app on the phone will be read.</string>
-    <string name="settings_sources_selected_desc">Only the apps ticked below will be read.</string>
-    <string name="settings_sources_empty">No expense-notification app has been detected yet.</string>
+    
+    
 
     <string name="settings_section_diagnostics">Diagnostics</string>
     <string name="settings_diag_service_ok">Listener service connected</string>
@@ -64,7 +64,7 @@
     <string name="settings_diag_battery_ok">Battery optimisation is not restricting it</string>
     <string name="settings_diag_battery_restricted">Battery optimisation may stop the service</string>
     <string name="settings_diag_battery_open">Review battery optimisation</string>
-    <string name="settings_diag_app_unknown">Unknown app (%1$s)</string>
+    
     <string name="settings_diag_suggested">Suggested</string>
     <string name="settings_diag_advice_battery">If the service stops on its own, exclude Mis Gastos from battery optimisation and from apps that kill background processes.</string>
     <string name="settings_diag_advice_no_data">If no expense comes in, check that your bank actually sends the notification and that its app is listed under "Sending apps".</string>
@@ -76,7 +76,10 @@
     </plurals>
     <string name="settings_delete_all">Delete all expenses</string>
     <string name="settings_delete_all_confirm_title">Delete everything?</string>
-    <string name="settings_delete_all_confirm_body">The %1$d expenses stored on this phone will be removed. Nothing is backed up anywhere: this cannot be undone.</string>
+    <plurals name="settings_delete_all_confirm_body">
+        <item quantity="one">The expense stored on this phone will be removed. Nothing is backed up anywhere: this cannot be undone.</item>
+        <item quantity="other">The %1$d expenses stored on this phone will be removed. Nothing is backed up anywhere: this cannot be undone.</item>
+    </plurals>
     <string name="settings_delete_all_confirm_action">Yes, delete all</string>
     <string name="settings_deleted_all">All expenses have been deleted.</string>
 
@@ -91,9 +94,9 @@
 
     <!-- Summary -->
     <string name="summary_title">Summary</string>
-    <string name="summary_today">Today</string>
-    <string name="summary_month">This month</string>
-    <string name="summary_previous_month">Last month</string>
+    
+    
+    
     <string name="summary_vs_previous">%1$s vs last month</string>
     <string name="summary_up">%1$s more than last month</string>
     <string name="summary_down">%1$s less than last month</string>
@@ -115,14 +118,14 @@
         <item quantity="other">%1$d expenses · %2$s</item>
     </plurals>
 
-    <string name="expense_needs_review">Needs review</string>
+    
     <string name="expense_category_label">Category</string>
     <string name="expense_category_new">New category</string>
     <string name="expense_category_edit">Edit expense</string>
     <string name="expense_category_hint">Category name</string>
     <string name="expense_merchant_hint">Merchant</string>
     <string name="expense_raw_text">Original text</string>
-    <string name="expense_source">Source</string>
+    
     <string name="expense_delete_confirm_title">Delete this expense?</string>
     <string name="expense_delete_confirm_body">It will be removed from the list. You can undo it with the snackbar shown below.</string>
 
@@ -188,7 +191,7 @@
     <!-- List redesign -->
     <string name="expenses_group_today">Today</string>
     <string name="expenses_group_yesterday">Yesterday</string>
-    <string name="expenses_group_total">Day total</string>
+    
 
     <!-- Onboarding -->
     <string name="onboarding_welcome_eyebrow">Your expenses, on autopilot</string>
@@ -206,8 +209,14 @@
     <string name="expense_restore_failed">Could not undo: this expense can no longer be restored</string>
     <string name="settings_diag_rebind_unsupported">This Android version cannot reconnect the service automatically: turn notification access off and on again.</string>
     <string name="summary_month_close">Month close</string>
-    <string name="summary_month_close_hint">%1$d months</string>
-    <string name="summary_month_close_option">%1$d months</string>
+    <plurals name="summary_month_close_hint">
+        <item quantity="one">%1$d month</item>
+        <item quantity="other">%1$d months</item>
+    </plurals>
+    <plurals name="summary_month_close_option">
+        <item quantity="one">%1$d month</item>
+        <item quantity="other">%1$d months</item>
+    </plurals>
     <string name="summary_month_close_year">Total for %1$d</string>
     <string name="summary_month_variation_up">+%1$d%%</string>
     <string name="summary_month_variation_down">-%1$d%%</string>
@@ -245,7 +254,7 @@
     <string name="settings_sources_all_risk">Right now notifications from ALL apps on the
         phone are being read, not just your bank\'s.</string>
     <string name="settings_sources_narrow">Keep only the apps I mark</string>
-    <string name="settings_sources_choice_label">Apps to read notifications from</string>
+    
     <string name="settings_sources_only_selected_risk">Only the apps you mark below will be
         read. If your bank is not there, no expense will be saved.</string>
     <plurals name="settings_sources_count">
@@ -254,8 +263,10 @@
     </plurals>
     <string name="settings_sources_forget">Forget</string>
     <string name="settings_sources_forget_title">Forget this app?</string>
-    <string name="settings_sources_forget_body">The %1$d stored expenses from %2$s will be
-        deleted and the app will no longer be allowed. This cannot be undone.</string>
+    <plurals name="settings_sources_forget_body">
+        <item quantity="one">The stored expense from %1$s will be deleted and the app will no longer be allowed. This cannot be undone.</item>
+        <item quantity="other">The %1$d stored expenses from %2$s will be deleted and the app will no longer be allowed. This cannot be undone.</item>
+    </plurals>
     <string name="settings_sources_forget_done">Forgot everything from %1$s</string>
     <string name="settings_sources_empty_hint">No app has sent anything yet. As soon as an app
         tells you about a payment and it is not saved, come back here to mark it.</string>

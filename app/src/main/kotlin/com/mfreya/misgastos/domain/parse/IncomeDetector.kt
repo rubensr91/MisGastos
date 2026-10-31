@@ -70,7 +70,12 @@ object IncomeDetector {
 
     private val RECEIVED_CHARGE = Regex(
         "\\b(?:has|hemos|ha) recibido (?:un |una |el |la |tu )?" +
-            "(?:cargo|compra|cobro|factura|recibo|adeudo)\\b",
+            "(?:cargo|compra|cobro|factura|recibo|adeudo|aviso|solicitud|recordatorio)\\b",
+    )
+
+    private val RECEIPT_EXCLUSIONS = Regex(
+        "\\b(?:abono|ingreso) (?:de|por) (?:la |el |tu )?" +
+            "(?:factura|recibo|cuota|prestamo|hipoteca|seguro|multa|sancion|comision)\\b",
     )
 
     private val DIACRITICS = Regex("\\p{InCombiningDiacriticalMarks}+")
@@ -82,6 +87,7 @@ object IncomeDetector {
     private fun matches(text: String?): Boolean {
         if (text == null) return false
         val folded = fold(text)
+        if (RECEIPT_EXCLUSIONS.containsMatchIn(folded)) return false
         if (RECEIPT.containsMatchIn(folded)) return true
         return RECEIVED.containsMatchIn(folded) && !RECEIVED_CHARGE.containsMatchIn(folded)
     }

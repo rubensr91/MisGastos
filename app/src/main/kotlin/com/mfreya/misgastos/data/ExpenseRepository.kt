@@ -149,6 +149,7 @@ class ExpenseRepository(
             toMillis = item.postedAt + mergeWindowMillis,
             limit = MERGE_CANDIDATE_LIMIT,
         ).filter { it.sourcePackage != MANUAL_SOURCE_PACKAGE }
+            .filter { PaymentMerger.sameMerchant(it.toCandidate(), item.toCandidate()) }
         val target = candidates.firstOrNull() ?: return null
         val fields = PaymentMerger.merge(target.toCandidate(), item.toCandidate())
         // La categoria se recalcula con el comercio que ha ganado: asi una regla nueva o una
