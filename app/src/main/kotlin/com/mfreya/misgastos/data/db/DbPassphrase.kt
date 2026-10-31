@@ -33,8 +33,7 @@ internal object DbPassphrase {
 
     /**
      * Devuelve la clave de la base de datos, creandola la primera vez. El resultado son 64
-     * caracteres ASCII en hexadecimal: sirven igual como contrasena de SQLCipher y se pueden
-     * incrustar sin comillas raras al exportar una base de datos antigua.
+     * caracteres ASCII en hexadecimal que SQLCipher usa como contrasena.
      */
     fun getOrCreate(context: Context): ByteArray = synchronized(this) {
         val prefs = context.getSharedPreferences(PREFS, Context.MODE_PRIVATE)

@@ -69,6 +69,7 @@ internal object DatabaseEncryption {
 
     private fun export(source: File, target: File, passphrase: ByteArray) {
         deleteDatabaseFiles(target)
+        check(target.createNewFile()) { "No se pudo crear la copia cifrada" }
         val key = passphrase.decodeToString()
         val plaintext = SQLiteDatabase.openDatabase(
             source.path,
@@ -78,10 +79,8 @@ internal object DatabaseEncryption {
         try {
             // Todo lo que quede en el WAL del SQLite antiguo tiene que entrar en la copia.
             runCatching { plaintext.rawExecSQL("PRAGMA wal_checkpoint(FULL)") }
-            plaintext.rawExecSQL(
-                "ATTACH DATABASE ? AS encrypted KEY '$key'",
-                target.path,
-            )
+            val targetPath = target.path.replace("'", "''")
+            plaintext.rawExecSQL("ATTACH DATABASE '$targetPath' AS encrypted KEY '$key'")
             plaintext.rawExecSQL("SELECT sqlcipher_export('encrypted')")
             plaintext.rawExecSQL("DETACH DATABASE encrypted")
         } finally {
@@ -95,7 +94,7 @@ internal object DatabaseEncryption {
             file.path,
             passphrase,
             null as SQLiteDatabase.CursorFactory?,
-            SQLiteDatabase.OPEN_READONLY,
+            SQLiteDatabase.OPEN_READWRITE,
             null,
         )
         try {

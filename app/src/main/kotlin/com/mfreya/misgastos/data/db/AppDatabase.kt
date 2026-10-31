@@ -1,6 +1,7 @@
 package com.mfreya.misgastos.data.db
 
 import android.content.Context
+import android.util.Log
 import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
@@ -65,18 +66,20 @@ abstract class AppDatabase : RoomDatabase() {
 
         fun build(context: Context): AppDatabase {
             val appContext = context.applicationContext
-            val passphrase = DbPassphrase.getOrCreate(appContext)
-            DatabaseEncryption.loadSqlCipher()
-            DatabaseEncryption.prepare(appContext, passphrase)
-            return Room.databaseBuilder(
-                appContext,
-                AppDatabase::class.java,
-                NAME,
-            )
-                .openHelperFactory(SupportOpenHelperFactory(passphrase))
+            val encrypted = runCatching {
+                val passphrase = DbPassphrase.getOrCreate(appContext)
+                DatabaseEncryption.loadSqlCipher()
+                DatabaseEncryption.prepare(appContext, passphrase)
+                passphrase
+            }.getOrElse { error ->
+                Log.e("MisGastos", "no se pudo cifrar la base de datos", error)
+                null
+            }
+            val builder = Room.databaseBuilder(appContext, AppDatabase::class.java, NAME)
                 .setJournalMode(JournalMode.WRITE_AHEAD_LOGGING)
                 .addMigrations(MIGRATION_1_2, MIGRATION_2_3)
-                .build()
+            if (encrypted != null) builder.openHelperFactory(SupportOpenHelperFactory(encrypted))
+            return builder.build()
         }
     }
 }
