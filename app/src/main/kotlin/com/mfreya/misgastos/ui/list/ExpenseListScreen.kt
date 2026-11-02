@@ -29,8 +29,6 @@ import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.Checkbox
-import androidx.compose.material3.CheckboxDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -151,30 +149,21 @@ fun ExpenseListScreen(modifier: Modifier = Modifier) {
     Scaffold(
         modifier = modifier,
         topBar = {
+            ScreenHeader(
+                title = stringResource(R.string.expenses_title),
+                scrollBehavior = headerScroll,
+            )
+        },
+        bottomBar = {
             if (selectionMode) {
-                SelectionTopBar(
+                val deleteMessage = pluralStringResource(
+                    R.plurals.expenses_delete_multiple,
+                    selectedIds.size,
+                    selectedIds.size,
+                )
+                SelectionBottomBar(
                     count = selectedIds.size,
-                    onDelete = { deleteMessage ->
-                        viewModel.clearSelection()
-                        scope.launch {
-                            val deleted = viewModel.deleteSelected()
-                            batchDeleted = deleted
-                            val result = snackbarHostState.showSnackbar(
-                                message = deleteMessage,
-                                actionLabel = undoLabel,
-                            )
-                            if (result == SnackbarResult.ActionPerformed) {
-                                batchDeleted = null
-                                deleted.forEach { expense ->
-                                    viewModel.restore(expense) { restored ->
-                                        if (!restored) {
-                                            scope.launch { snackbarHostState.showSnackbar(restoreFailedMessage) }
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    },
+                    onClose = { viewModel.clearSelection() },
                     onMerge = {
                         val idsToMerge = selectedIds.toList()
                         val mergeMessage = mergeDoneMessage
@@ -196,12 +185,27 @@ fun ExpenseListScreen(modifier: Modifier = Modifier) {
                             }
                         }
                     },
-                    onClose = { viewModel.clearSelection() },
-                )
-            } else {
-                ScreenHeader(
-                    title = stringResource(R.string.expenses_title),
-                    scrollBehavior = headerScroll,
+                    onDelete = {
+                        viewModel.clearSelection()
+                        scope.launch {
+                            val deleted = viewModel.deleteSelected()
+                            batchDeleted = deleted
+                            val result = snackbarHostState.showSnackbar(
+                                message = deleteMessage,
+                                actionLabel = undoLabel,
+                            )
+                            if (result == SnackbarResult.ActionPerformed) {
+                                batchDeleted = null
+                                deleted.forEach { expense ->
+                                    viewModel.restore(expense) { restored ->
+                                        if (!restored) {
+                                            scope.launch { snackbarHostState.showSnackbar(restoreFailedMessage) }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
                 )
             }
         },
@@ -742,14 +746,6 @@ private fun SwipeableExpenseRow(
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
                     ExpenseRow(expense = expense)
-                    Checkbox(
-                        checked = selected,
-                        onCheckedChange = { onSelectionChange() },
-                        colors = CheckboxDefaults.colors(
-                            checkedColor = MaterialTheme.colorScheme.primary,
-                            uncheckedColor = MaterialTheme.colorScheme.onSurfaceVariant,
-                        ),
-                    )
                 }
                 HorizontalDivider(color = MaterialTheme.colorScheme.surfaceVariant)
             }
@@ -832,6 +828,55 @@ private fun SelectionTopBar(
         Spacer(Modifier.width(8.dp))
         TextButton(
             onClick = { onDelete(deleteMessage) },
+        ) {
+            Text(stringResource(R.string.common_delete))
+        }
+    }
+}
+
+@Composable
+private fun SelectionBottomBar(
+    count: Int,
+    onClose: () -> Unit,
+    onMerge: () -> Unit,
+    onDelete: () -> Unit,
+) {
+    val countText = pluralStringResource(
+        R.plurals.expenses_selection_count,
+        count,
+        count,
+    )
+    val deleteMessage = pluralStringResource(
+        R.plurals.expenses_delete_multiple,
+        count,
+        count,
+    )
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Text(
+            text = stringResource(R.string.expenses_selection_title, count),
+            style = MaterialTheme.typography.titleMedium,
+            color = MaterialTheme.colorScheme.onSurface,
+            modifier = Modifier.weight(1f),
+        )
+        Spacer(Modifier.width(8.dp))
+        TextButton(
+            onClick = onClose,
+        ) {
+            Text(stringResource(R.string.common_cancel))
+        }
+        Spacer(Modifier.width(8.dp))
+        TextButton(
+            onClick = onMerge,
+            enabled = count == 2,
+        ) {
+            Text(stringResource(R.string.expenses_action_merge))
+        }
+        Spacer(Modifier.width(8.dp))
+        TextButton(
+            onClick = onDelete,
         ) {
             Text(stringResource(R.string.common_delete))
         }
