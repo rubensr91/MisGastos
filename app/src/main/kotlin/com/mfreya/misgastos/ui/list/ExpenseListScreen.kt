@@ -46,6 +46,7 @@ import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.SnackbarResult
 import androidx.compose.material3.Text
+import androidx.compose.material3.Button
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -745,7 +746,7 @@ private fun SwipeableExpenseRow(
                 ),
             shape = cardShape,
             colors = CardDefaults.cardColors(
-                containerColor = MaterialTheme.colorScheme.surface,
+                containerColor = if (selected) MaterialTheme.colorScheme.primaryContainer else MaterialTheme.colorScheme.surface,
             ),
         ) {
             Column(modifier = Modifier.padding(horizontal = 14.dp)) {
@@ -849,41 +850,24 @@ private fun SelectionBottomBar(
     onMerge: () -> Unit,
     onDelete: () -> Unit,
 ) {
-    val countText = pluralStringResource(
-        R.plurals.expenses_selection_count,
-        count,
-        count,
-    )
-    val deleteMessage = pluralStringResource(
-        R.plurals.expenses_delete_multiple,
-        count,
-        count,
-    )
     Row(
         modifier = Modifier.fillMaxWidth(),
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        Text(
-            text = stringResource(R.string.expenses_selection_title, count),
-            style = MaterialTheme.typography.titleMedium,
-            color = MaterialTheme.colorScheme.onSurface,
-            modifier = Modifier.weight(1f),
-        )
-        Spacer(Modifier.width(8.dp))
         TextButton(
             onClick = onClose,
         ) {
             Text(stringResource(R.string.common_cancel))
         }
         Spacer(Modifier.width(8.dp))
-        TextButton(
+        Button(
             onClick = onMerge,
             enabled = count >= 2,
         ) {
             Text(stringResource(R.string.expenses_action_merge))
         }
         Spacer(Modifier.width(8.dp))
-        TextButton(
+        Button(
             onClick = onDelete,
             enabled = count >= 2,
         ) {
