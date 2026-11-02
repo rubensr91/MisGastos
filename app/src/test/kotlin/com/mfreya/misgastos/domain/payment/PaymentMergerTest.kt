@@ -2,6 +2,7 @@ package com.mfreya.misgastos.domain.payment
 
 import com.mfreya.misgastos.domain.parse.ParsedExpense
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Test
 
@@ -104,5 +105,48 @@ class PaymentMergerTest {
         assertEquals("Amazon", fields.merchant)
         assertEquals(good.rawText, fields.rawText)
         assertEquals(good.sourcePackage, fields.sourcePackage)
+    }
+
+    @Test
+    fun sameMerchantAcceptsContainedNamesFromDifferentApps() {
+        val wallet = candidate("Amazon", 95, "AMAZON", sourcePackage = "com.google.wallet")
+        val tradeRepublic =
+            candidate("Amazon EU Sarl", 70, "Amazon EU Sarl", sourcePackage = "de.traderepublic.app")
+
+        assertTrue(PaymentMerger.sameMerchant(wallet, tradeRepublic))
+        assertTrue(PaymentMerger.sameMerchant(tradeRepublic, wallet))
+    }
+
+    @Test
+    fun sameMerchantRejectsUnrelatedNamesAcrossApps() {
+        val bank = candidate("Mercadona", 95, "MERCADONA", sourcePackage = "de.banco")
+        val wallet = candidate("Repsol", 95, "REPSOL", sourcePackage = "com.google.wallet")
+
+        assertFalse(PaymentMerger.sameMerchant(bank, wallet))
+    }
+
+    @Test
+    fun sameMerchantRejectsShortNamesEvenWhenOneContainsTheOther() {
+        val wallet = candidate("Ab", 95, "AB", sourcePackage = "com.google.wallet")
+        val tradeRepublic = candidate("Ab Cd", 95, "AB CD", sourcePackage = "de.traderepublic.app")
+
+        assertFalse(PaymentMerger.sameMerchant(wallet, tradeRepublic))
+    }
+
+    @Test
+    fun sameMerchantStaysExactInsideOneApp() {
+        val first = candidate("Amazon", 95, "AMAZON")
+        val second = candidate("Amazon EU Sarl", 70, "Amazon EU Sarl")
+
+        assertFalse(PaymentMerger.sameMerchant(first, second))
+    }
+
+    @Test
+    fun sameMerchantPassesWhenEitherSideDoesNotKnowTheMerchant() {
+        val known = candidate("Amazon", 95, "AMAZON", sourcePackage = "de.banco")
+        val unknown = candidate("Desconocido", 60, "7,59 EUR", sourcePackage = "com.google.wallet")
+
+        assertTrue(PaymentMerger.sameMerchant(known, unknown))
+        assertTrue(PaymentMerger.sameMerchant(unknown, known))
     }
 }
