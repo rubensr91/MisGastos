@@ -44,6 +44,7 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
+import androidx.compose.material3.SnackbarDuration
 import androidx.compose.material3.SnackbarResult
 import androidx.compose.material3.Text
 import androidx.compose.material3.Button
@@ -86,6 +87,7 @@ import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import java.util.Locale
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.delay
 
 
 /** Ancho reservado a las dos acciones que aparecen al deslizar la fila. */
@@ -333,6 +335,7 @@ fun ExpenseListScreen(modifier: Modifier = Modifier) {
                             val result = snackbarHostState.showSnackbar(
                                 message = deletedMessage,
                                 actionLabel = undoLabel,
+                                duration = SnackbarDuration.Long,
                             )
                             if (result == SnackbarResult.ActionPerformed) {
                                 viewModel.restore(expense) { restored ->
@@ -381,6 +384,7 @@ fun ExpenseListScreen(modifier: Modifier = Modifier) {
                             val result = snackbarHostState.showSnackbar(
                                 message = deleteMsg,
                                 actionLabel = undoLabel,
+                                duration = SnackbarDuration.Long,
                             )
                             if (result == SnackbarResult.ActionPerformed) {
                                 deleted.forEach { expense ->
@@ -446,24 +450,25 @@ fun ExpenseListScreen(modifier: Modifier = Modifier) {
             onSave = { amountCents, merchant, category ->
                 mergeExpense = null
                 mergeOriginals = null
-                scope.launch {
-                    val merged = viewModel.mergeSelected(
-                        amountCents = amountCents,
-                        merchant = merchant,
-                        category = category,
-                        postedAt = expenseToMerge.postedAt,
-                    )
-                    if (merged != null) {
-                        val result = snackbarHostState.showSnackbar(
-                            message = mergeDoneMessage,
-                            actionLabel = undoLabel,
-                        )
-                        if (result == SnackbarResult.ActionPerformed) {
-                            viewModel.delete(merged)
-                            originals.forEach { viewModel.restore(it) }
+                        scope.launch {
+                            val merged = viewModel.mergeSelected(
+                                amountCents = amountCents,
+                                merchant = merchant,
+                                category = category,
+                                postedAt = expenseToMerge.postedAt,
+                            )
+                            if (merged != null) {
+                                val result = snackbarHostState.showSnackbar(
+                                    message = mergeDoneMessage,
+                                    actionLabel = undoLabel,
+                                    duration = SnackbarDuration.Long,
+                                )
+                                if (result == SnackbarResult.ActionPerformed) {
+                                    viewModel.delete(merged)
+                                    originals.forEach { viewModel.restore(it) }
+                                }
+                            }
                         }
-                    }
-                }
             },
         )
     }
