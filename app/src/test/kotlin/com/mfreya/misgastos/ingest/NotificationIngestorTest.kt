@@ -17,6 +17,11 @@ import org.junit.Test
 
 class NotificationIngestorTest {
 
+    private companion object {
+        const val WALLET = "com.google.android.apps.walletnfcrel"
+        const val TRADE_REPUBLIC = "de.traderepublic.app"
+    }
+
     private fun parser(amountCents: Long?): (String?, String) -> ParsedExpense? = { _, _ ->
         amountCents?.let {
             ParsedExpense(
@@ -266,5 +271,103 @@ class NotificationIngestorTest {
         val inserted = result as IngestResult.Inserted
         assertEquals(1250L, inserted.expense.amountCents)
         assertEquals("Mercadona", inserted.expense.merchant)
+    }
+
+    @Test
+    fun googleWalletAndTradeRepublicTwinsFortyFiveSecondsApartLeaveOneRow() = runBlocking {
+        val dao = FakeExpenseDao()
+        val wallet = ingestor(dao, { true }, parsed("Amazon", 95))
+        val tradeRepublic = ingestor(dao, { true }, parsed("Amazon EU Sarl", 70))
+
+        wallet.ingest(
+            WALLET,
+            "AMAZON",
+            "AMAZON. 7,59 EUR",
+            100_000L,
+            "AMAZON. 7,59 EUR con Visa 4797",
+            100_000L,
+        )
+        val twin = tradeRepublic.ingest(
+            TRADE_REPUBLIC,
+            "Tarjeta",
+            "Has pagado 7,59 EUR en Amazon EU Sarl",
+            145_000L,
+            "Amazon EU Sarl. Has pagado 7,59 EUR con tu tarjeta",
+            145_000L,
+        )
+
+        assertTrue(twin is IngestResult.Merged)
+        val row = dao.rows.value.single()
+        assertEquals("Amazon", row.merchant)
+        assertEquals("Amazon EU Sarl. Has pagado 7,59 EUR con tu tarjeta", row.rawText)
+        assertEquals(WALLET, row.sourcePackage)
+    }
+
+    @Test
+    fun googleWalletAndTradeRepublicTwinsOneMinuteApartLeaveOneRow() = runBlocking {
+        val dao = FakeExpenseDao()
+        val wallet = ingestor(dao, { true }, parsed("Amazon", 95))
+        val tradeRepublic = ingestor(dao, { true }, parsed("Amazon EU Sarl", 70))
+
+        wallet.ingest(WALLET, "AMAZON", "AMAZON. 7,59 EUR", 100_000L, "AMAZON. 7,59 EUR", 100_000L)
+        val twin = tradeRepublic.ingest(
+            TRADE_REPUBLIC,
+            "Tarjeta",
+            "Has pagado 7,59 EUR en Amazon EU Sarl",
+            160_000L,
+            "Amazon EU Sarl. 7,59 EUR",
+            160_000L,
+        )
+
+        assertTrue(twin is IngestResult.Merged)
+        assertEquals(1, dao.count())
+    }
+
+    @Test
+    fun googleWalletAndTradeRepublicTwinsBeyondTheWindowStayTwoRows() = runBlocking {
+        val dao = FakeExpenseDao()
+        val wallet = ingestor(dao, { true }, parsed("Amazon", 95))
+        val tradeRepublic = ingestor(dao, { true }, parsed("Amazon EU Sarl", 70))
+
+        wallet.ingest(WALLET, "AMAZON", "AMAZON. 7,59 EUR", 100_000L, "AMAZON. 7,59 EUR", 100_000L)
+        val later = 100_000L + NotificationIngestor.MERGE_WINDOW_MILLIS + 5_000L
+        val twin = tradeRepublic.ingest(
+            TRADE_REPUBLIC,
+            "Tarjeta",
+            "Has pagado 7,59 EUR en Amazon EU Sarl",
+            later,
+            "Amazon EU Sarl. 7,59 EUR",
+            later,
+        )
+
+        assertTrue(twin is IngestResult.Inserted)
+        assertEquals(2, dao.count())
+    }
+
+    @Test
+    fun samePackageWithDifferentMerchantsInsideTheWindowStaysTwoRows() = runBlocking {
+        val dao = FakeExpenseDao()
+        val first = ingestor(dao, { true }, parsed("Amazon", 95))
+        val second = ingestor(dao, { true }, parsed("Amazon EU Sarl", 70))
+
+        first.ingest(
+            "de.banco",
+            "Amazon",
+            "Gastaste 7,59 EUR en Amazon",
+            100_000L,
+            "Gastaste 7,59 EUR en Amazon",
+            100_000L,
+        )
+        val other = second.ingest(
+            "de.banco",
+            "Amazon EU Sarl",
+            "Gastaste 7,59 EUR en Amazon EU Sarl",
+            140_000L,
+            "Gastaste 7,59 EUR en Amazon EU Sarl",
+            140_000L,
+        )
+
+        assertTrue(other is IngestResult.Inserted)
+        assertEquals(2, dao.count())
     }
 }
