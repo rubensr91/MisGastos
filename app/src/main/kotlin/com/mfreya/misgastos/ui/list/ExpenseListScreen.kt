@@ -4,6 +4,7 @@ import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.gestures.Orientation
 import androidx.compose.foundation.gestures.draggable
 import androidx.compose.foundation.gestures.rememberDraggableState
@@ -312,6 +313,11 @@ fun ExpenseListScreen(modifier: Modifier = Modifier) {
                                 } else {
                                     revealedRow = null
                                     editing = entry.expense
+                                }
+                            },
+                            onLongClick = {
+                                if (!selectionMode) {
+                                    viewModel.enterSelection(entry.expense.id)
                                 }
                             },
                             swipeEnabled = !selectionMode,
@@ -632,6 +638,7 @@ private fun SwipeableExpenseRow(
     onDelete: () -> Unit,
     onSelectionChange: () -> Unit,
     onClick: () -> Unit,
+    onLongClick: () -> Unit,
     swipeEnabled: Boolean,
 ) {
     val cardShape = MaterialTheme.shapes.medium
@@ -721,7 +728,7 @@ private fun SwipeableExpenseRow(
                         Modifier
                     },
                 )
-                .clickable(
+                .combinedClickable(
                     onClick = {
                         if (dragOffset > 0f) {
                             onRevealChange(false)
@@ -729,6 +736,7 @@ private fun SwipeableExpenseRow(
                             onClick()
                         }
                     },
+                    onLongClick = onLongClick,
                 )
                 .background(
                     if (selected) MaterialTheme.colorScheme.primaryContainer
@@ -870,13 +878,14 @@ private fun SelectionBottomBar(
         Spacer(Modifier.width(8.dp))
         TextButton(
             onClick = onMerge,
-            enabled = count == 2,
+            enabled = count >= 2,
         ) {
             Text(stringResource(R.string.expenses_action_merge))
         }
         Spacer(Modifier.width(8.dp))
         TextButton(
             onClick = onDelete,
+            enabled = count >= 2,
         ) {
             Text(stringResource(R.string.common_delete))
         }
