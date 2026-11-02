@@ -147,6 +147,9 @@ fun ExpenseListScreen(modifier: Modifier = Modifier) {
     // Gasto borrado por lote y sus originales, para el deshacer de borrado multiple y de combinar.
     var batchDeleted by remember { mutableStateOf<List<Expense>?>(null) }
     var mergeUndo by remember { mutableStateOf<Pair<Expense, List<Expense>>?>(null) }
+    var pendingBatchDelete by remember { mutableStateOf<List<Expense>?>(null) }
+    var mergeExpense by remember { mutableStateOf<Expense?>(null) }
+    var mergeOriginals by remember { mutableStateOf<List<Expense>?>(null) }
 
     Scaffold(
         modifier = modifier,
@@ -167,46 +170,31 @@ fun ExpenseListScreen(modifier: Modifier = Modifier) {
                     count = selectedIds.size,
                     onClose = { viewModel.clearSelection() },
                     onMerge = {
-                        val idsToMerge = selectedIds.toList()
-                        val mergeMessage = mergeDoneMessage
-                        viewModel.clearSelection()
-                        scope.launch {
-                            val merged = viewModel.mergeSelected()
-                            if (merged != null) {
-                                val originals = uiState.expenses.filter { it.id in idsToMerge }
-                                mergeUndo = Pair(merged, originals)
-                                val result = snackbarHostState.showSnackbar(
-                                    message = mergeMessage,
-                                    actionLabel = undoLabel,
-                                )
-                                if (result == SnackbarResult.ActionPerformed) {
-                                    mergeUndo = null
-                                    viewModel.delete(merged)
-                                    originals.forEach { viewModel.restore(it) }
-                                }
-                            }
+                        val toMerge = uiState.expenses.filter { it.id in selectedIds }
+                        if (toMerge.size == 2) {
+                            val primary = toMerge.maxByOrNull { it.postedAt }!!
+                            val secondary = toMerge.first { it.id != primary.id }
+                            mergeExpense = Expense(
+                                id = -1L,
+                                amountCents = primary.amountCents + secondary.amountCents,
+                                currency = primary.currency,
+                                merchant = primary.merchant,
+                                merchantRaw = primary.merchantRaw,
+                                category = primary.category,
+                                postedAt = primary.postedAt,
+                                ingestedAt = primary.ingestedAt,
+                                rawText = primary.rawText,
+                                sourcePackage = primary.sourcePackage,
+                                sourceTitle = primary.sourceTitle,
+                                parseConfidence = primary.parseConfidence,
+                            )
+                            mergeOriginals = toMerge
+                            viewModel.clearSelection()
                         }
                     },
                     onDelete = {
+                        pendingBatchDelete = uiState.expenses.filter { it.id in selectedIds }
                         viewModel.clearSelection()
-                        scope.launch {
-                            val deleted = viewModel.deleteSelected()
-                            batchDeleted = deleted
-                            val result = snackbarHostState.showSnackbar(
-                                message = deleteMessage,
-                                actionLabel = undoLabel,
-                            )
-                            if (result == SnackbarResult.ActionPerformed) {
-                                batchDeleted = null
-                                deleted.forEach { expense ->
-                                    viewModel.restore(expense) { restored ->
-                                        if (!restored) {
-                                            scope.launch { snackbarHostState.showSnackbar(restoreFailedMessage) }
-                                        }
-                                    }
-                                }
-                            }
-                        }
                     },
                 )
             }
@@ -372,6 +360,53 @@ fun ExpenseListScreen(modifier: Modifier = Modifier) {
         )
     }
 
+    pendingBatchDelete?.let { expensesToDelete ->
+        val deleteMsg = pluralStringResource(
+            R.plurals.expenses_delete_multiple,
+            expensesToDelete.size,
+            expensesToDelete.size,
+        )
+        AlertDialog(
+            onDismissRequest = { pendingBatchDelete = null },
+            title = { Text(pluralStringResource(
+                R.plurals.expenses_delete_multiple_confirm_title,
+                expensesToDelete.size,
+                expensesToDelete.size,
+            )) },
+            text = { Text(stringResource(R.string.expense_delete_confirm_body)) },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        pendingBatchDelete = null
+                        scope.launch {
+                            val deleted = viewModel.deleteSelected()
+                            val result = snackbarHostState.showSnackbar(
+                                message = deleteMsg,
+                                actionLabel = undoLabel,
+                            )
+                            if (result == SnackbarResult.ActionPerformed) {
+                                deleted.forEach { expense ->
+                                    viewModel.restore(expense) { restored ->
+                                        if (!restored) {
+                                            scope.launch { snackbarHostState.showSnackbar(restoreFailedMessage) }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                ) {
+                    Text(stringResource(R.string.common_confirm))
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { pendingBatchDelete = null }) {
+                    Text(stringResource(R.string.common_cancel))
+                }
+            },
+        )
+    }
+
     editing?.let { expense ->
         ExpenseEditDialog(
             expense = expense,
@@ -392,6 +427,41 @@ fun ExpenseListScreen(modifier: Modifier = Modifier) {
                         }
                     },
                 )
+            },
+        )
+    }
+
+    mergeExpense?.let { expenseToMerge ->
+        val originals = mergeOriginals ?: emptyList()
+        ExpenseEditDialog(
+            expense = expenseToMerge,
+            availableCategories = existingCategories,
+            title = stringResource(R.string.expenses_merge_dialog_title),
+            onDismiss = {
+                mergeExpense = null
+                mergeOriginals = null
+            },
+            onSave = { amountCents, merchant, category ->
+                mergeExpense = null
+                mergeOriginals = null
+                scope.launch {
+                    val merged = viewModel.mergeSelected(
+                        amountCents = amountCents,
+                        merchant = merchant,
+                        category = category,
+                        postedAt = expenseToMerge.postedAt,
+                    )
+                    if (merged != null) {
+                        val result = snackbarHostState.showSnackbar(
+                            message = mergeDoneMessage,
+                            actionLabel = undoLabel,
+                        )
+                        if (result == SnackbarResult.ActionPerformed) {
+                            viewModel.delete(merged)
+                            originals.forEach { viewModel.restore(it) }
+                        }
+                    }
+                }
             },
         )
     }

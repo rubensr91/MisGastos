@@ -34,6 +34,7 @@ fun ExpenseEditDialog(
     onSave: (amountCents: Long, merchant: String, category: String) -> Unit,
     locale: Locale = Locale.getDefault(),
     availableCategories: List<String> = emptyList(),
+    title: String = stringResource(R.string.expense_category_edit),
 ) {
     var amountText by remember(expense.id) {
         mutableStateOf(Money.formatPlain(expense.amountCents, locale))
@@ -49,7 +50,7 @@ fun ExpenseEditDialog(
 
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text(stringResource(R.string.expense_category_edit)) },
+        title = { Text(title) },
         text = {
             Column(
                 modifier = Modifier.verticalScroll(rememberScrollState()),

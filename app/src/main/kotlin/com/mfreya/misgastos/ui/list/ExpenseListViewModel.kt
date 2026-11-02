@@ -183,11 +183,17 @@ class ExpenseListViewModel(private val repository: ExpenseRepository) : ViewMode
     }
 
     /**
-     * Combina exactamente dos gastos seleccionados en uno nuevo. Devuelve el gasto creado
-     * para que el llamante pueda mostrar snackbar con deshacer (borrar el creado y restaurar
-     * los dos originales). Devuelve `null` si no hay exactamente dos seleccionados.
+     * Combina exactamente dos gastos seleccionados en uno nuevo con los valores dados.
+     * Devuelve el gasto creado para que el llamante pueda mostrar snackbar con deshacer
+     * (borrar el creado y restaurar los dos originales). Devuelve `null` si no hay
+     * exactamente dos seleccionados.
      */
-    suspend fun mergeSelected(): Expense? {
+    suspend fun mergeSelected(
+        amountCents: Long,
+        merchant: String,
+        category: String,
+        postedAt: Long,
+    ): Expense? {
         val toMerge = uiState.value.expenses.filter { it.id in selectedIds.value }
         if (toMerge.size != 2) return null
         val primary = toMerge.maxByOrNull { it.postedAt }!!
@@ -195,10 +201,10 @@ class ExpenseListViewModel(private val repository: ExpenseRepository) : ViewMode
         val merged = repository.mergeExpenses(
             primary = primary,
             secondary = secondary,
-            amountCents = primary.amountCents + secondary.amountCents,
-            merchant = primary.merchant,
-            category = primary.category,
-            postedAt = primary.postedAt,
+            amountCents = amountCents,
+            merchant = merchant,
+            category = category,
+            postedAt = postedAt,
         )
         clearSelection()
         return merged
