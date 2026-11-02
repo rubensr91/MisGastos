@@ -179,22 +179,28 @@ abajo) hay una comprobación aparte, antes de insertar.
 
 ### Un pago, un solo gasto: la fusión de avisos
 
-Cuando pagas con Google Pay, avisan **dos apps**: la del banco y Google Wallet. Los dos avisos
-describen el mismo pago y llegan con uno o dos segundos de diferencia, pero con datos
-distintos: el del banco suele traer el verbo (`Gastaste 45,00 € en AMAZON PRIME`) y el
-comercio limpio, y el de Google Wallet trae el nombre real del comercio en el título y el
-número de la tarjeta en el cuerpo (`45,00 € con Trade Republic Visa Card ••4797`).
+Cuando pagas con la tarjeta desde el móvil, avisan **dos apps** del mismo cargo: Google Wallet
+y Trade Republic. Los dos avisos describen el mismo pago, pero con datos distintos y **hasta
+un minuto de diferencia**: el de Google Wallet suele traer el nombre real del comercio en el
+título y el número de la tarjeta en el cuerpo (`45,00 € con Visa Card ••4797`), y el de Trade
+Republic trae el verbo y el comercio tal y como lo conoce la tarjeta
+(`Has pagado 45,00 € en AMAZON EU Sarl`). Si pagas con Google Pay, el segundo aviso es el de
+la app del banco.
 
 Antes se guardaban los dos y el total salía **duplicado**. Ahora, si llega un aviso con el
-**mismo importe** que un gasto guardado en los últimos **30 segundos**
-(`NotificationIngestor.MERGE_WINDOW_MILLIS`) **y ambos avisos hablan del mismo comercio**, se
+**mismo importe** que un gasto guardado en los últimos **90 segundos**
+(`ExpenseRepository.MERGE_WINDOW_MILLIS`) **y ambos avisos hablan del mismo comercio**, se
 entiende que es el mismo pago y se **combinan en una sola fila** en lugar de crear otra. Da
 igual el orden de llegada: el mejor dato gana tanto si el aviso nuevo es el bueno como si es
 el que ya estaba guardado.
 
 El comercio se compara normalizado (minúsculas, sin tildes ni signos): `Mercadona` y
-`MERCADONA` son el mismo, pero `Mercadona` y `REPSOL` no. Si alguno de los dos avisos no trae
-comercio reconocible, la comparación no descarta la fusión.
+`MERCADONA` son el mismo, pero `Mercadona` y `REPSOL` no. Entre **apps distintas** se admite
+además que un nombre esté contenido en el otro, porque cada app escribe el comercio a su
+manera: `Amazon` y `Amazon EU Sarl` son el mismo cargo. Esa tolerancia pide al menos cuatro
+letras y **no** se aplica a dos avisos de la misma app, para no unir dos compras iguales del
+mismo importe. Si alguno de los dos avisos no trae comercio reconocible, la comparación no
+descarta la fusión.
 
 Cada campo se queda con el aviso que mejor lo trajo (`domain/payment/PaymentMerger.kt`):
 
@@ -207,10 +213,11 @@ Cada campo se queda con el aviso que mejor lo trajo (`domain/payment/PaymentMerg
 | confianza | la mayor de las dos |
 | categoría | se **recalcula** con el comercio ganador, así que también se aplica una regla nueva o una corrección tuya |
 
-> **Consecuencia asumida:** dos compras del **mismo importe y mismo comercio** en menos de 30
-> segundos se fusionan en una sola fila. Con 30 segundos el margen es suficiente para los dos
-> avisos de un mismo pago y muy corto para que te ocurra por error. Dos avisos del mismo
-> importe en comercios distintos ya **no** se mezclan.
+> **Consecuencia asumida:** dos compras del **mismo importe y mismo comercio** en menos de 90
+> segundos se fusionan en una sola fila. Con 90 segundos el margen cubre los dos avisos de un
+> mismo pago (Wallet y Trade Republic pueden tardar hasta un minuto) y sigue siendo corto para
+> que te ocurra por error. Dos avisos del mismo importe en comercios distintos ya **no** se
+> mezclan.
 > Los descartes y combinaciones quedan en logcat con la etiqueta `MisGastosIngest`
 > (`combinada con la id=…`), sin importes, comercios ni texto de la notificación.
 
@@ -370,7 +377,7 @@ Cada pantalla se queda asi con su altura real.
     y **categoría**. Si se deja en *Sin categoría*, la app la deduce del comercio con las
     reglas de siempre; si se elige una, también queda aprendida. El gasto se guarda con un
     origen reservado (`manual`) y confianza 100, así que nunca sale en *Revisar* ni se
-    fusiona con el aviso del banco si coinciden el importe y el minuto.
+    fusiona con un aviso aunque coincidan el importe y el momento.
   - **Al hacer scroll el buscador desaparece**: no es una cabecera fija sino el primer
     elemento de la lista, así que se va de la vista al bajar (como las filas) y vuelve
     al subir, dejando el hueco libre para ver más gastos de una vez.
@@ -633,8 +640,8 @@ diferente, se añade en `domain/parse/` junto con su test.
 **Sale un importe que no es.**
 Borra el gasto deslizando la fila y confirma con **Ajustes → Borrar todo** si hace falta.
 Los duplicados por reentrega del sistema no son posibles gracias al índice único de la tabla,
-y los avisos duplicados del mismo pago (banco y Google Wallet a la vez, o un reenvío del banco
-con hora nueva) se combinan en una sola fila por la ventana de fusión de 30 segundos descrita
+y los avisos duplicados del mismo pago (Google Wallet y Trade Republic a la vez, o un reenvío
+con hora nueva) se combinan en una sola fila por la ventana de fusión de 90 segundos descrita
 más arriba.
 
 **La app se cierra sola en segundo plano.**
