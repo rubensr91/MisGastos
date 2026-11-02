@@ -40,7 +40,6 @@ import com.mfreya.misgastos.domain.MonthCloseCalculator
 import com.mfreya.misgastos.domain.MonthCloseReport
 import com.mfreya.misgastos.domain.StatsCalculator
 import com.mfreya.misgastos.domain.Summary
-import com.mfreya.misgastos.ui.components.AnimatedAmount
 import com.mfreya.misgastos.ui.components.BarItem
 import com.mfreya.misgastos.ui.components.BrandCard
 import com.mfreya.misgastos.ui.components.CategoryAvatar
@@ -249,10 +248,9 @@ fun SummaryScreen(modifier: Modifier = Modifier) {
                                             style = MaterialTheme.typography.bodySmall,
                                             color = MaterialTheme.colorScheme.onSurfaceVariant,
                                         )
-                                        AnimatedAmount(
-                                            cents = current.monthCents,
+                                        Text(
+                                            text = Money.format(current.monthCents),
                                             style = MaterialTheme.typography.titleLarge,
-                                            durationMillis = 800,
                                         )
                                     }
                                 },
@@ -523,11 +521,10 @@ private fun MonthHero(current: Summary, modifier: Modifier = Modifier) {
             color = brand.onBrand.copy(alpha = 0.86f),
         )
         Spacer(Modifier.height(8.dp))
-        AnimatedAmount(
-            cents = current.monthCents,
+        Text(
+            text = Money.format(current.monthCents),
             style = MaterialTheme.typography.displayMedium,
             color = brand.onBrand,
-            durationMillis = 900,
         )
         Spacer(Modifier.height(18.dp))
         Row(

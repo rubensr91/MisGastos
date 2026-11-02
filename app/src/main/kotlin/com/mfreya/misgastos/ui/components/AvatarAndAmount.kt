@@ -1,8 +1,5 @@
 package com.mfreya.misgastos.ui.components
 
-import androidx.compose.animation.core.Animatable
-import androidx.compose.animation.core.FastOutSlowInEasing
-import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Box
@@ -13,20 +10,13 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.mfreya.misgastos.ui.format.Money
 import com.mfreya.misgastos.ui.theme.LocalBrandColors
-import java.util.Locale
-import kotlin.math.roundToLong
 
 /**
  * Círculo con la inicial del comercio sobre el color de su categoría. Es el recurso
@@ -57,38 +47,6 @@ fun CategoryAvatar(
             maxLines = 1,
         )
     }
-}
-
-/**
- * Cifra que cuenta hacia arriba al cambiar. Un detalle pequeño que separa una app
- * "viva" de una estática.
- */
-@Composable
-fun AnimatedAmount(
-    cents: Long,
-    modifier: Modifier = Modifier,
-    style: TextStyle = MaterialTheme.typography.displaySmall,
-    color: Color = MaterialTheme.colorScheme.onSurface,
-    locale: Locale = Locale.getDefault(),
-    durationMillis: Int = 650,
-) {
-    val target = cents / 100f
-    val animated = remember { Animatable(0f) }
-    LaunchedEffect(cents) {
-        animated.snapTo(if (target < 0f) 0f else animated.value)
-        animated.animateTo(
-            targetValue = target,
-            animationSpec = tween(durationMillis, easing = FastOutSlowInEasing),
-        )
-    }
-    Text(
-        text = Money.format((animated.value * 100f).roundToLong(), locale),
-        style = style,
-        color = color,
-        maxLines = 1,
-        overflow = TextOverflow.Ellipsis,
-        modifier = modifier,
-    )
 }
 
 /**

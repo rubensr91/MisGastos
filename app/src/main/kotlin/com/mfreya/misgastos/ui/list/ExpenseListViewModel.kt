@@ -9,6 +9,8 @@ import com.mfreya.misgastos.domain.model.Expense
 import com.mfreya.misgastos.ui.format.Dates
 import java.time.LocalDate
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -21,6 +23,7 @@ data class ListUiState(
     val expenses: List<Expense> = emptyList(),
     val totalCents: Long = 0L,
     val loading: Boolean = true,
+    val selectedIds: Set<Long> = emptySet(),
 )
 
 class ExpenseListViewModel(private val repository: ExpenseRepository) : ViewModel() {
@@ -30,19 +33,30 @@ class ExpenseListViewModel(private val repository: ExpenseRepository) : ViewMode
     /** Texto del buscador, que es el unico criterio de la lista ahora mismo. */
     val currentQuery: StateFlow<String> = query
 
+    /** Ids de los gastos seleccionados en modo multi-seleccion. Vacío cuando no hay seleccion. */
+    private val selectedIds = MutableStateFlow<Set<Long>>(emptySet())
+    val currentSelectedIds: StateFlow<Set<Long>> = selectedIds
+
+    /** True cuando hay al menos un gasto seleccionado. */
+    val selectionMode: Flow<Boolean> = selectedIds.map { it.isNotEmpty() }
+
     /**
      * La lista se pide entera (del mas reciente al mas antiguo) y solo se acota con el
      * texto de busqueda, que el DAO filtra en SQL sobre comercio, categoria y texto
      * original.
      */
     @OptIn(ExperimentalCoroutinesApi::class)
-    val uiState: StateFlow<ListUiState> = query.flatMapLatest { text ->
-        repository.observe(ExpenseFilter(query = text.ifBlank { null }))
-    }.map { filtered ->
+    val uiState: StateFlow<ListUiState> = combine(
+        query.flatMapLatest { text ->
+            repository.observe(ExpenseFilter(query = text.ifBlank { null }))
+        },
+        selectedIds,
+    ) { filtered, ids ->
         ListUiState(
             expenses = filtered,
             totalCents = StatsCalculator.total(filtered),
             loading = false,
+            selectedIds = ids,
         )
     }.stateIn(
         scope = viewModelScope,
@@ -52,6 +66,7 @@ class ExpenseListViewModel(private val repository: ExpenseRepository) : ViewMode
 
     fun setQuery(value: String) {
         query.value = value
+        clearSelection()
     }
 
     private val grouping = MutableStateFlow(GroupingMode.DAY)
@@ -64,6 +79,7 @@ class ExpenseListViewModel(private val repository: ExpenseRepository) : ViewMode
 
     fun setGrouping(mode: GroupingMode) {
         grouping.value = mode
+        clearSelection()
     }
 
     /**
@@ -133,5 +149,58 @@ class ExpenseListViewModel(private val repository: ExpenseRepository) : ViewMode
             }.getOrDefault(false)
             onResult(ok)
         }
+    }
+
+    /** Entra en modo seleccion con un solo gasto (long-press en una fila). */
+    fun enterSelection(id: Long) {
+        selectedIds.value = setOf(id)
+    }
+
+    /** Alterna la seleccion de un gasto. Si no hay seleccion, entra en modo con ese gasto. */
+    fun toggleSelection(id: Long) {
+        val current = selectedIds.value
+        selectedIds.value = when {
+            current.isEmpty() -> setOf(id)
+            current.contains(id) -> current - id
+            else -> current + id
+        }
+    }
+
+    /** Sale del modo seleccion y limpia la seleccion. */
+    fun clearSelection() {
+        selectedIds.value = emptySet()
+    }
+
+    /**
+     * Borra todos los gastos seleccionados en una transaccion. Devuelve los gastos borrados
+     * para que el llamante pueda mostrar snackbar con deshacer (restaurar cada uno).
+     */
+    suspend fun deleteSelected(): List<Expense> {
+        val toDelete = uiState.value.expenses.filter { it.id in selectedIds.value }
+        repository.deleteAll(toDelete.map { it.id })
+        clearSelection()
+        return toDelete
+    }
+
+    /**
+     * Combina exactamente dos gastos seleccionados en uno nuevo. Devuelve el gasto creado
+     * para que el llamante pueda mostrar snackbar con deshacer (borrar el creado y restaurar
+     * los dos originales). Devuelve `null` si no hay exactamente dos seleccionados.
+     */
+    suspend fun mergeSelected(): Expense? {
+        val toMerge = uiState.value.expenses.filter { it.id in selectedIds.value }
+        if (toMerge.size != 2) return null
+        val primary = toMerge.maxByOrNull { it.postedAt }!!
+        val secondary = toMerge.first { it.id != primary.id }
+        val merged = repository.mergeExpenses(
+            primary = primary,
+            secondary = secondary,
+            amountCents = primary.amountCents + secondary.amountCents,
+            merchant = primary.merchant,
+            category = primary.category,
+            postedAt = primary.postedAt,
+        )
+        clearSelection()
+        return merged
     }
 }

@@ -325,6 +325,31 @@ class ExpenseRepository(
 
     suspend fun deleteAll() = dao.deleteAll()
 
+    /** Borra varios gastos por id en una sola transaccion. Devuelve cuántos se borraron. */
+    suspend fun deleteAll(ids: List<Long>): Int = dao.deleteByIds(ids)
+
+    /**
+     * Combina dos gastos en uno nuevo: crea un gasto con el importe sumado, el comercio y la
+     * categoria indicados, y la fecha del mas reciente. Borra los dos originales en una sola
+     * transaccion. Devuelve el gasto creado.
+     */
+    suspend fun mergeExpenses(
+        primary: Expense,
+        secondary: Expense,
+        amountCents: Long,
+        merchant: String,
+        category: String,
+        postedAt: Long,
+    ): Expense {
+        val block: suspend () -> Expense = {
+            val merged = createExpense(amountCents, merchant, category, postedAt)
+            delete(primary.id)
+            delete(secondary.id)
+            merged
+        }
+        return database?.withTransaction { block() } ?: block()
+    }
+
     companion object {
         /** Origen reservado a los gastos que escribe el usuario: no los manda ninguna app. */
         const val MANUAL_SOURCE_PACKAGE = "manual"

@@ -29,6 +29,8 @@ import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Checkbox
+import androidx.compose.material3.CheckboxDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -37,6 +39,7 @@ import androidx.compose.material3.FilterChipDefaults
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
@@ -117,6 +120,8 @@ fun ExpenseListScreen(modifier: Modifier = Modifier) {
     val query by viewModel.currentQuery.collectAsStateWithLifecycle()
     val existingCategories by viewModel.categories.collectAsStateWithLifecycle()
     val grouping by viewModel.currentGrouping.collectAsStateWithLifecycle()
+    val selectionMode by viewModel.selectionMode.collectAsStateWithLifecycle(initialValue = false)
+    val selectedIds by viewModel.currentSelectedIds.collectAsStateWithLifecycle()
     val snackbarHostState = remember { SnackbarHostState() }
     val scope = rememberCoroutineScope()
     val deletedMessage = stringResource(R.string.expenses_deleted)
@@ -126,6 +131,7 @@ fun ExpenseListScreen(modifier: Modifier = Modifier) {
     val editFailedMessage = stringResource(R.string.expense_edit_failed)
     val createdMessage = stringResource(R.string.expense_create_done)
     val createFailedMessage = stringResource(R.string.expense_create_failed)
+    val mergeDoneMessage = stringResource(R.string.expenses_merge_done)
     val resultText = pluralStringResource(
         R.plurals.expenses_result_count,
         uiState.expenses.size,
@@ -138,14 +144,66 @@ fun ExpenseListScreen(modifier: Modifier = Modifier) {
     var creating by remember { mutableStateOf(false) }
     // Solo una fila puede estar abierta a la vez: al abrir otra, esta se cierra sola.
     var revealedRow by remember { mutableStateOf<Long?>(null) }
+    // Gasto borrado por lote y sus originales, para el deshacer de borrado multiple y de combinar.
+    var batchDeleted by remember { mutableStateOf<List<Expense>?>(null) }
+    var mergeUndo by remember { mutableStateOf<Pair<Expense, List<Expense>>?>(null) }
 
     Scaffold(
         modifier = modifier,
         topBar = {
-            ScreenHeader(
-                title = stringResource(R.string.expenses_title),
-                scrollBehavior = headerScroll,
-            )
+            if (selectionMode) {
+                SelectionTopBar(
+                    count = selectedIds.size,
+                    onDelete = { deleteMessage ->
+                        viewModel.clearSelection()
+                        scope.launch {
+                            val deleted = viewModel.deleteSelected()
+                            batchDeleted = deleted
+                            val result = snackbarHostState.showSnackbar(
+                                message = deleteMessage,
+                                actionLabel = undoLabel,
+                            )
+                            if (result == SnackbarResult.ActionPerformed) {
+                                batchDeleted = null
+                                deleted.forEach { expense ->
+                                    viewModel.restore(expense) { restored ->
+                                        if (!restored) {
+                                            scope.launch { snackbarHostState.showSnackbar(restoreFailedMessage) }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    onMerge = {
+                        val idsToMerge = selectedIds.toList()
+                        val mergeMessage = mergeDoneMessage
+                        viewModel.clearSelection()
+                        scope.launch {
+                            val merged = viewModel.mergeSelected()
+                            if (merged != null) {
+                                val originals = uiState.expenses.filter { it.id in idsToMerge }
+                                mergeUndo = Pair(merged, originals)
+                                val result = snackbarHostState.showSnackbar(
+                                    message = mergeMessage,
+                                    actionLabel = undoLabel,
+                                )
+                                if (result == SnackbarResult.ActionPerformed) {
+                                    mergeUndo = null
+                                    viewModel.delete(merged)
+                                    originals.forEach { viewModel.restore(it) }
+                                }
+                            }
+                        }
+                    },
+                    onClose = { viewModel.clearSelection() },
+                )
+            } else {
+                ScreenHeader(
+                    title = stringResource(R.string.expenses_title),
+                    scrollBehavior = headerScroll,
+                )
+            }
         },
         snackbarHost = { SnackbarHost(snackbarHostState) },
         floatingActionButton = {
@@ -233,6 +291,7 @@ fun ExpenseListScreen(modifier: Modifier = Modifier) {
                         is ListEntry.PeriodHeader -> PeriodHeaderRow(entry, grouping)
                         is ListEntry.Item -> SwipeableExpenseRow(
                             expense = entry.expense,
+                            selected = selectedIds.contains(entry.expense.id),
                             revealed = revealedRow == entry.expense.id,
                             onRevealChange = { open ->
                                 revealedRow = if (open) entry.expense.id else null
@@ -242,6 +301,16 @@ fun ExpenseListScreen(modifier: Modifier = Modifier) {
                                 editing = entry.expense
                             },
                             onDelete = { pendingDelete = entry.expense },
+                            onSelectionChange = { viewModel.toggleSelection(entry.expense.id) },
+                            onClick = {
+                                if (selectionMode) {
+                                    viewModel.toggleSelection(entry.expense.id)
+                                } else {
+                                    revealedRow = null
+                                    editing = entry.expense
+                                }
+                            },
+                            swipeEnabled = !selectionMode,
                         )
                     }
                 }
@@ -552,21 +621,18 @@ private fun GroupingSelector(
 @Composable
 private fun SwipeableExpenseRow(
     expense: Expense,
+    selected: Boolean,
     revealed: Boolean,
     onRevealChange: (Boolean) -> Unit,
     onEdit: () -> Unit,
     onDelete: () -> Unit,
+    onSelectionChange: () -> Unit,
+    onClick: () -> Unit,
+    swipeEnabled: Boolean,
 ) {
     val cardShape = MaterialTheme.shapes.medium
     val maxOffset = with(LocalDensity.current) { ActionsWidth.toPx() }
 
-    // Dos valores, y no uno solo con un Animatable, por una razon concreta: `onDelta` de
-    // `rememberDraggableState` no es suspend en esta version de Compose, asi que escribir
-    // en un Animatable exigiria lanzar una corrutina por evento. Como cada `snapTo` cancela
-    // al anterior, la mayoria se cancelarian antes de aplicarse y al soltar el dedo el
-    // valor real seria casi cero (la fila volvio a cerrarse sola en las pruebas).
-    // Aqui `dragOffset` se escribe de forma sincrona y exacta mientras se arrastra, y
-    // `settleOffset` solo sirve para animar el asentamiento al soltar.
     var dragOffset by remember(expense.id) { mutableFloatStateOf(0f) }
     val settleOffset = remember(expense.id) { Animatable(0f) }
     var dragging by remember(expense.id) { mutableStateOf(false) }
@@ -589,13 +655,7 @@ private fun SwipeableExpenseRow(
     }
 
     val dragState = rememberDraggableState(
-        // El dedo se mueve a la izquierda, asi que `delta` llega en negativo: el
-        // desplazamiento "revelado" se guarda como positivo y se aplica en `graphicsLayer`
-        // con signo negativo. Hay que invertir el signo aqui, porque si se sumara el delta
-        // sobre un valor coercionado a [0, maxOffset] nunca se acumularia nada.
         onDelta = { delta ->
-            // Si habia una animacion de cierre en curso, el arrastre retoma desde donde
-            // estaba la tarjeta y no desde el ultimo valor del dedo.
             if (!dragging) dragOffset = settleOffset.value
             dragging = true
             dragOffset = (dragOffset - delta).coerceIn(0f, maxOffset)
@@ -639,34 +699,58 @@ private fun SwipeableExpenseRow(
                 .graphicsLayer {
                     val x = if (dragging) dragOffset else settleOffset.value
                     translationX = -x
-                    // Al desplazar la tarjeta se recortan sus esquinas, para que no tape
-                    // los botones que tiene delante.
                     clip = x > 0f
                     shape = cardShape
                 }
-                .draggable(
-                    state = dragState,
-                    orientation = Orientation.Horizontal,
-                    onDragStopped = {
-                        val open = dragOffset > maxOffset * OpenThreshold
-                        animateOffsetTo(if (open) maxOffset else 0f)
-                        onRevealChange(open)
+                .then(
+                    if (swipeEnabled) {
+                        Modifier.draggable(
+                            state = dragState,
+                            orientation = Orientation.Horizontal,
+                            onDragStopped = {
+                                val open = dragOffset > maxOffset * OpenThreshold
+                                animateOffsetTo(if (open) maxOffset else 0f)
+                                onRevealChange(open)
+                            },
+                        )
+                    } else {
+                        Modifier
                     },
                 )
-                .clickable {
-                    if (dragOffset > 0f) {
-                        onRevealChange(false)
-                    } else {
-                        onEdit()
-                    }
-                },
+                .clickable(
+                    onClick = {
+                        if (dragOffset > 0f) {
+                            onRevealChange(false)
+                        } else {
+                            onClick()
+                        }
+                    },
+                )
+                .background(
+                    if (selected) MaterialTheme.colorScheme.primaryContainer
+                    else MaterialTheme.colorScheme.surface,
+                    shape = cardShape,
+                ),
             shape = cardShape,
             colors = CardDefaults.cardColors(
                 containerColor = MaterialTheme.colorScheme.surface,
             ),
         ) {
             Column(modifier = Modifier.padding(horizontal = 14.dp)) {
-                ExpenseRow(expense = expense)
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    ExpenseRow(expense = expense)
+                    Checkbox(
+                        checked = selected,
+                        onCheckedChange = { onSelectionChange() },
+                        colors = CheckboxDefaults.colors(
+                            checkedColor = MaterialTheme.colorScheme.primary,
+                            uncheckedColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                        ),
+                    )
+                }
                 HorizontalDivider(color = MaterialTheme.colorScheme.surfaceVariant)
             }
         }
@@ -701,5 +785,55 @@ private fun RowAction(
             maxLines = 1,
             overflow = TextOverflow.Ellipsis,
         )
+    }
+}
+
+/** Top bar que se muestra en modo seleccion: conteo, acciones y cerrar. */
+@Composable
+private fun SelectionTopBar(
+    count: Int,
+    onDelete: (String) -> Unit,
+    onMerge: () -> Unit,
+    onClose: () -> Unit,
+) {
+    val countText = pluralStringResource(
+        R.plurals.expenses_selection_count,
+        count,
+        count,
+    )
+    val deleteMessage = pluralStringResource(
+        R.plurals.expenses_delete_multiple,
+        count,
+        count,
+    )
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Text(
+            text = stringResource(R.string.expenses_selection_title, count),
+            style = MaterialTheme.typography.titleMedium,
+            color = MaterialTheme.colorScheme.onSurface,
+            modifier = Modifier.weight(1f),
+        )
+        Spacer(Modifier.width(8.dp))
+        TextButton(
+            onClick = onClose,
+        ) {
+            Text(stringResource(R.string.common_cancel))
+        }
+        Spacer(Modifier.width(8.dp))
+        TextButton(
+            onClick = onMerge,
+            enabled = count == 2,
+        ) {
+            Text(stringResource(R.string.expenses_action_merge))
+        }
+        Spacer(Modifier.width(8.dp))
+        TextButton(
+            onClick = { onDelete(deleteMessage) },
+        ) {
+            Text(stringResource(R.string.common_delete))
+        }
     }
 }

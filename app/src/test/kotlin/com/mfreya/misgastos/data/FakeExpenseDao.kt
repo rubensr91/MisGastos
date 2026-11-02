@@ -71,6 +71,12 @@ internal class FakeExpenseDao : ExpenseDao {
         return before - rows.value.size
     }
 
+    override suspend fun deleteByIds(ids: List<Long>): Int {
+        val before = rows.value.size
+        rows.value = rows.value.filterNot { it.id in ids }
+        return before - rows.value.size
+    }
+
     override suspend fun deleteAll() {
         rows.value = emptyList()
     }

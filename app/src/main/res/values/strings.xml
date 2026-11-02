@@ -201,6 +201,25 @@
     <string name="chart_cd_categories">Reparto por categoría</string>
     <string name="chart_cd_merchants">Comercios con más gasto</string>
     <string name="expenses_hint_swipe">Desliza una fila hacia la izquierda para editarla o borrarla</string>
+
+    <!-- Selección múltiple -->
+    <string name="expenses_selection_title">%1$d seleccionados</string>
+    <plurals name="expenses_selection_count">
+        <item quantity="one">%1$d gasto seleccionado</item>
+        <item quantity="other">%1$d gastos seleccionados</item>
+    </plurals>
+    <string name="expenses_action_merge">Combinar</string>
+    <plurals name="expenses_delete_multiple_confirm_title">
+        <item quantity="one">¿Eliminar este gasto?</item>
+        <item quantity="other">¿Eliminar estos %1$d gastos?</item>
+    </plurals>
+    <plurals name="expenses_delete_multiple">
+        <item quantity="one">%1$d gasto eliminado.</item>
+        <item quantity="other">%1$d gastos eliminados.</item>
+    </plurals>
+    <string name="expenses_merge_done">Gastos combinados.</string>
+    <string name="expenses_merge_dialog_title">Combinar gastos</string>
+    <string name="expenses_merge_total">Total:</string>
     <string name="expenses_action_edit">Editar</string>
     <string name="expense_amount_label">Importe</string>
     <string name="expense_amount_invalid">Escribe un importe válido, por ejemplo 12,50</string>

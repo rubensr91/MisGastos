@@ -201,6 +201,25 @@
     <string name="chart_cd_categories">Spend by category</string>
     <string name="chart_cd_merchants">Top merchants</string>
     <string name="expenses_hint_swipe">Swipe a row left to edit or delete it</string>
+
+    <!-- Multi-selection -->
+    <string name="expenses_selection_title">%1$d selected</string>
+    <plurals name="expenses_selection_count">
+        <item quantity="one">%1$d expense selected</item>
+        <item quantity="other">%1$d expenses selected</item>
+    </plurals>
+    <string name="expenses_action_merge">Merge</string>
+    <plurals name="expenses_delete_multiple_confirm_title">
+        <item quantity="one">Delete this expense?</item>
+        <item quantity="other">Delete these %1$d expenses?</item>
+    </plurals>
+    <plurals name="expenses_delete_multiple">
+        <item quantity="one">%1$d expense deleted.</item>
+        <item quantity="other">%1$d expenses deleted.</item>
+    </plurals>
+    <string name="expenses_merge_done">Expenses merged.</string>
+    <string name="expenses_merge_dialog_title">Merge expenses</string>
+    <string name="expenses_merge_total">Total:</string>
     <string name="expenses_action_edit">Edit</string>
     <string name="expense_amount_label">Amount</string>
     <string name="expense_amount_invalid">Enter a valid amount, for example 12.50</string>
