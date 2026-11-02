@@ -41,13 +41,20 @@ data class MergedFields(
  * tienen nada que ver entre si.
  *
  * El comercio editado a mano por el usuario puede verse afectado solo si corrige un gasto y
- * en los siguientes segundos llega otro aviso del mismo importe; la ventana es de 30 s, asi
+ * en los siguientes segundos llega otro aviso del mismo importe; la ventana es de 90 s, asi
  * que en la practica no ocurre.
+ *
+ * Cuando los dos avisos vienen de apps distintas el comercio puede estar escrito de formas
+ * diferentes: se dan por iguales si uno contiene al otro (con al menos
+ * [MIN_CONTAINED_MERCHANT_LENGTH] caracteres) despues de normalizarlos.
  */
 object PaymentMerger {
 
     /** Peso de que el comercio sea conocido: manda sobre cualquier otra diferencia. */
     private const val KNOWN_MERCHANT_WEIGHT = 10_000
+
+    /** Longitud minima para aceptar que dos comercios distintos son el mismo por contencion. */
+    private const val MIN_CONTAINED_MERCHANT_LENGTH = 4
     private val DIACRITICS = Regex("\\p{M}+")
     private val NON_ALPHANUMERIC = Regex("[^a-z0-9]+")
     private val WHITESPACE = Regex("\\s+")
@@ -67,7 +74,16 @@ object PaymentMerger {
 
     fun sameMerchant(existing: MergeCandidate, incoming: MergeCandidate): Boolean {
         if (!existing.parsed.merchantKnown || !incoming.parsed.merchantKnown) return true
-        return normalizeMerchant(existing.parsed.merchant) == normalizeMerchant(incoming.parsed.merchant)
+        val mine = normalizeMerchant(existing.parsed.merchant)
+        val other = normalizeMerchant(incoming.parsed.merchant)
+        if (mine == other) return true
+        // Dos apps distintas escriben el mismo comercio de forma distinta: Google Wallet puede
+        // poner "Amazon" y Trade Republic "Amazon EU Sarl". Solo se admite esa diferencia entre
+        // avisos de paquetes distintos, para no unir dos compras iguales del mismo importe.
+        if (existing.sourcePackage == incoming.sourcePackage) return false
+        val shorter = if (mine.length <= other.length) mine else other
+        val longer = if (shorter == mine) other else mine
+        return shorter.length >= MIN_CONTAINED_MERCHANT_LENGTH && longer.contains(shorter)
     }
 
     private fun normalizeMerchant(value: String): String {
