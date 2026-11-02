@@ -189,12 +189,10 @@ fun ExpenseListScreen(modifier: Modifier = Modifier) {
                                 parseConfidence = primary.parseConfidence,
                             )
                             mergeOriginals = toMerge
-                            viewModel.clearSelection()
                         }
                     },
                     onDelete = {
                         pendingBatchDelete = uiState.expenses.filter { it.id in selectedIds }
-                        viewModel.clearSelection()
                     },
                 )
             }
@@ -400,7 +398,10 @@ fun ExpenseListScreen(modifier: Modifier = Modifier) {
                 }
             },
             dismissButton = {
-                TextButton(onClick = { pendingBatchDelete = null }) {
+                TextButton(onClick = {
+                    pendingBatchDelete = null
+                    viewModel.clearSelection()
+                }) {
                     Text(stringResource(R.string.common_cancel))
                 }
             },
@@ -440,6 +441,7 @@ fun ExpenseListScreen(modifier: Modifier = Modifier) {
             onDismiss = {
                 mergeExpense = null
                 mergeOriginals = null
+                viewModel.clearSelection()
             },
             onSave = { amountCents, merchant, category ->
                 mergeExpense = null
