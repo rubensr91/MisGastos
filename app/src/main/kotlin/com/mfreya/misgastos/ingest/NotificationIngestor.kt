@@ -167,11 +167,10 @@ class NotificationIngestor(
         const val TAG = "MisGastosIngest"
 
         /**
-         * Margen para dar por hecho que dos avisos son el mismo pago. Al pagar con Google Pay
-         * avisan el banco y Google Wallet, y solo se guarda una fila con lo mejor de los dos.
-         * Treinta segundos bastan de sobra para los dos avisos del mismo pago y evitan unir dos
-         * compras distintas del mismo importe.
+         * Margen para dar por hecho que dos avisos son el mismo pago. Vive en
+         * [ExpenseRepository.MERGE_WINDOW_MILLIS] para que el aviso suelto y la rafaga usen
+         * siempre el mismo valor.
          */
-        const val MERGE_WINDOW_MILLIS = 30 * 1000L
+        const val MERGE_WINDOW_MILLIS = ExpenseRepository.MERGE_WINDOW_MILLIS
     }
 }

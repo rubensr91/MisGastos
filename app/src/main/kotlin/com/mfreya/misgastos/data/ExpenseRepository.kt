@@ -95,7 +95,7 @@ class ExpenseRepository(
         ingestedAt: Long,
     ): InsertOutcome = insert(
         item = BatchIngest(parsed, postedAt, rawText, sourcePackage, sourceTitle, ingestedAt),
-        mergeWindowMillis = DEFAULT_MERGE_WINDOW_MILLIS,
+        mergeWindowMillis = MERGE_WINDOW_MILLIS,
     )
 
     /**
@@ -335,11 +335,11 @@ class ExpenseRepository(
         private const val INSERT_DUPLICATE = -1L
 
         /**
-         * Margen para dar por hecho que dos avisos del mismo pago. Los dos del banco y Google
-         * Wallet llegan con uno o dos segundos de diferencia, asi que 30 s sobra y minimiza el
-         * riesgo de unir dos compras distintas del mismo importe.
+         * Margen para dar por hecho que dos avisos son el mismo pago. Sirve para cualquier
+         * pareja de apps que avisen del mismo cargo: Google Wallet y Trade Republic pueden
+         * tardar hasta un minuto en avisar las dos, asi que la ventana es de 90 s.
          */
-        const val DEFAULT_MERGE_WINDOW_MILLIS = 30_000L
+        const val MERGE_WINDOW_MILLIS = 90_000L
 
         /** Solo se mira el primero: si hay varios, son pagos distintos que coinciden en importe. */
         const val MERGE_CANDIDATE_LIMIT = 5
